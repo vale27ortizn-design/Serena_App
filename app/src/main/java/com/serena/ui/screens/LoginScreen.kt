@@ -191,7 +191,7 @@ fun LoginScreen(
                                 text = "La contraseña debe tener al menos una letra mayúscula"
                             )
                         }
-                        //---------------------------------------------------------------------------
+
                         !clave.any {
                             it.isDigit()
                         } -> {
