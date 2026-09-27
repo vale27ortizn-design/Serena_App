@@ -192,6 +192,7 @@ fun LoginScreen(
                             )
                         }
 
+
                         !clave.any {
                             it.isDigit()
                         } -> {
