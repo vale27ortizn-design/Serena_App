@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Colores base por defecto de la app -->
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
@@ -7,9 +8,13 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="verde_100">#E8EFE8</color>
-    <color name="negro_100">#3E403D</color>
-    <color name="gris_txt">#9B9D98</color>
-    <color name="gris_icon">#757773</color>
-    <color name="verde_300">#87A987</color>
+
+    <!-- Colores personalizados -->
+    <color name="serena_green_primary">#81A282</color>  <!-- Botón principal y destacado -->
+    <color name="serena_green_light">#E9F0E8</color>    <!-- Fondo de pills/mensajes arriba -->
+    <color name="serena_green_dark">#5E7F65</color>     <!-- Texto verde / iconos destacados -->
+    <color name="serena_bg_input">#F3F4EE</color>       <!-- Fondo de los campos de texto -->
+    <color name="serena_text_dark">#333333</color>      <!-- Titulares y etiquetas principales -->
+    <color name="serena_text_gray">#7A7A7A</color>      <!-- Subtítulos, placeholders y textos secundarios -->
+    <color name="serena_icon_gray">#757773</color>      <!-- Tint de iconos dentro de los inputs -->
 </resources>

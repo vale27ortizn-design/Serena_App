@@ -8,8 +8,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
+import com.serena.ui.screens.LoginScreen
 import com.serena.ui.screens.SplashScreen
 import com.serena.ui.theme.SerenaAppTheme
 import kotlinx.coroutines.delay
@@ -40,4 +43,15 @@ class SplashActivity : ComponentActivity() {
     }
 }
 
+
+@Preview(showBackground = true)
+@Composable
+fun GreetingFullScreenPreview2() {
+    SerenaAppTheme() {
+        LoginScreen(
+            modifier = Modifier
+                .fillMaxSize(),
+        )
+    }
+}
 

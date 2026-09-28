@@ -5,7 +5,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.serena.ui.components.SerenaTab
+import com.serena.ui.screens.InicioScreen
 import com.serena.ui.screens.LoginScreen
+import com.serena.ui.screens.PerfilScreen
 import com.serena.ui.screens.RegisterScreen
 
 @Composable
@@ -19,6 +22,7 @@ fun AppNavigation(
         startDestination = "login",
         modifier = modifier,
     ) {
+        // Pantalla de Login
         composable("login") {
             LoginScreen(
                 onLoginSuccess = {
@@ -30,10 +34,11 @@ fun AppNavigation(
             )
         }
 
+        // Pantalla de Registro
         composable("registro") {
-            RegisterScreen (
+            RegisterScreen(
                 onRegisterSuccess = {
-                    navController.popBackStack() // al login tras guardar
+                    navController.popBackStack()
                 },
                 onNavigateToLogin = {
                     navController.popBackStack()
@@ -41,8 +46,48 @@ fun AppNavigation(
             )
         }
 
+        // Pantalla de Inicio
         composable("menu-inicio") {
-            // Inicio()
+            InicioScreen(
+                onNavigateToTab = { tab ->
+                    when (tab) {
+                        SerenaTab.INICIO -> {
+                        }
+                        SerenaTab.PERFIL -> {
+                            navController.navigate("perfil")
+                        }
+                        SerenaTab.DIARIO -> {
+                            // navController.navigate("diario")
+                        }
+                        SerenaTab.CHAT -> {
+                            // navController.navigate("chat")
+                        }
+                    }
+                },
+                onStartBreathingClick = {
+                    // respracion
+                }
+            )
+        }
+
+        // Pantalla de Perfil
+        composable("perfil") {
+            PerfilScreen(
+                onNavigateToTab = { tab ->
+                    when (tab) {
+                        SerenaTab.INICIO -> {
+                            navController.navigate("menu-inicio")
+                        }
+                        SerenaTab.PERFIL -> {}
+                        else -> {}
+                    }
+                },
+                onLogoutClick = {
+                    navController.navigate("login") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

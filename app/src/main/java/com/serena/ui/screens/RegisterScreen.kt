@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -54,120 +55,220 @@ fun RegisterScreen(
     onRegisterSuccess: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {}
 ) {
-    // estados para guardar lo que escribe el usuario
+    // Estados para los valores de los campos
     var nombres by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var clave by remember { mutableStateOf("") }
     var claveVisible by remember { mutableStateOf(false) }
 
-    // colores del tema de la app
-    val colorPrimaryGreen = Color(0xFF81A282)
-    val colorLightGreen = Color(0xFFE9F0E8)
-    val colorDarkGreen = Color(0xFF5E7F65)
-    val colorInputBackground = Color(0xFFF3F4EE)
-    val colorTextDark = Color(0xFF333333)
-    val colorTextGray = Color(0xFF7A7A7A)
+    // Estados para los errores
+    var errorNombres by remember { mutableStateOf(false) }
+    var errorEmail by remember { mutableStateOf(false) }
+    var errorClave by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(
-                color = colorResource(R.color.verde_100)
-            )
+            .background(colorResource(R.color.white))
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .imePadding() // Añadido para que el teclado no tape los campos
+            .padding(horizontal = 24.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // mensaje flotante de arriba
+        // Mensaje superior flotante
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
         ) {
             Surface(
                 shape = RoundedCornerShape(50),
-                color = colorLightGreen
+                color = colorResource(R.color.serena_green_light)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.icon_email),
+                        painter = painterResource(id = R.drawable.icon_hoja),
                         contentDescription = null,
-                        tint = colorDarkGreen,
+                        tint = colorResource(R.color.serena_green_dark),
                         modifier = Modifier.size(12.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "Tú puedes, no te rindas",
                         fontSize = 11.sp,
-                        color = colorDarkGreen,
+                        color = colorResource(R.color.serena_green_dark),
                         fontWeight = FontWeight.Medium
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
-        // titulo y texto de bienvenida
+        // Título y Subtítulo
         Text(
             text = "Únete a Serena",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = colorTextDark
+            color = colorResource(R.color.serena_text_dark)
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = "Completa tus datos para crear tu\nespacio personal de bienestar.",
-            color = colorTextGray,
+            color = colorResource(R.color.serena_text_gray),
             fontSize = 12.sp,
             lineHeight = 16.sp,
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-        // inputs de datos personales
-        RegisterTextField(
-            label = "Nombres",
-            value = nombres,
-            onValueChange = { nombres = it },
-            placeholder = "Ingresa tus nombres",
-            iconResId = R.drawable.icon_email
-        )
+        // Campo: Nombres
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "Nombres",
+                color = colorResource(R.color.serena_text_dark),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+            )
+            TextField(
+                value = nombres,
+                onValueChange = {
+                    nombres = it
+                    if (nombres.isNotBlank()) errorNombres = false
+                },
+                placeholder = {
+                    Text(
+                        text = "Ingresa tus nombres",
+                        color = colorResource(R.color.serena_text_gray),
+                        fontSize = 12.sp
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.icon_usuario),
+                        contentDescription = "Icono Usuario",
+                        tint = colorResource(R.color.serena_icon_gray),
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
+                singleLine = true,
+                isError = errorNombres,
+                shape = RoundedCornerShape(50),
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = colorResource(R.color.serena_text_dark),
+                    unfocusedTextColor = colorResource(R.color.serena_text_dark),
+                    focusedContainerColor = colorResource(R.color.serena_bg_input),
+                    unfocusedContainerColor = colorResource(R.color.serena_bg_input),
+                    errorContainerColor = colorResource(R.color.serena_bg_input),
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    errorIndicatorColor = Color.Transparent
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                supportingText = {
+                    if (errorNombres) {
+                        Text(
+                            text = "El nombre es obligatorio",
+                            color = Color.Red,
+                            fontSize = 10.sp
+                        )
+                    }
+                }
+            )
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        RegisterTextField(
-            label = "Correo electrónico",
-            value = email,
-            onValueChange = { email = it },
-            placeholder = "ejemplo@correo.com",
-            keyboardType = KeyboardType.Email,
-            iconResId = R.drawable.icon_email
-        )
+        // Campo: Correo electrónico
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "Correo electrónico",
+                color = colorResource(R.color.serena_text_dark),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+            )
+            TextField(
+                value = email,
+                onValueChange = {
+                    email = it
+                    if (email.isNotBlank()) errorEmail = false
+                },
+                placeholder = {
+                    Text(
+                        text = "ejemplo@correo.com",
+                        color = colorResource(R.color.serena_text_gray),
+                        fontSize = 12.sp
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.icon_email),
+                        contentDescription = "Icono Email",
+                        tint = colorResource(R.color.serena_icon_gray),
+                        modifier = Modifier.size(18.dp)
+                    )
+                },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                isError = errorEmail,
+                shape = RoundedCornerShape(50),
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = colorResource(R.color.serena_text_dark),
+                    unfocusedTextColor = colorResource(R.color.serena_text_dark),
+                    focusedContainerColor = colorResource(R.color.serena_bg_input),
+                    unfocusedContainerColor = colorResource(R.color.serena_bg_input),
+                    errorContainerColor = colorResource(R.color.serena_bg_input),
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    errorIndicatorColor = Color.Transparent
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                supportingText = {
+                    if (errorEmail) {
+                        Text(
+                            text = if (email.isEmpty()) "El correo es obligatorio" else "Ingrese un correo válido",
+                            color = Color.Red,
+                            fontSize = 10.sp
+                        )
+                    }
+                }
+            )
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // input especial para la contraseña (con toggle de ojito)
+        // Campo: Contraseña
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = "Contraseña",
-                color = colorTextDark,
-                fontSize = 11.sp,
+                color = colorResource(R.color.serena_text_dark),
+                fontSize = 10.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
             )
             TextField(
                 value = clave,
-                onValueChange = { clave = it },
-                placeholder = { Text("Crea una contraseña segura", color = colorTextGray, fontSize = 12.sp) },
+                onValueChange = {
+                    clave = it
+                    if (clave.isNotBlank()) errorClave = false
+                },
+                placeholder = {
+                    Text(
+                        text = "Crea una contraseña segura",
+                        color = colorResource(R.color.serena_text_gray),
+                        fontSize = 12.sp
+                    )
+                },
                 leadingIcon = {
                     Icon(
-                        painter = painterResource(id = R.drawable.icon_candado),
-                        contentDescription = null,
-                        tint = colorTextGray,
+                        painter = painterResource(R.drawable.icon_candado),
+                        contentDescription = "Icono Candado",
+                        tint = colorResource(R.color.serena_icon_gray),
                         modifier = Modifier.size(18.dp)
                     )
                 },
@@ -175,39 +276,82 @@ fun RegisterScreen(
                     IconButton(onClick = { claveVisible = !claveVisible }) {
                         Icon(
                             painter = painterResource(
-                                id = if (claveVisible) R.drawable.icon_ojoabierto else R.drawable.icon_ojocerrado
+                                if (claveVisible) R.drawable.icon_ojoabierto else R.drawable.icon_ojocerrado
                             ),
-                            contentDescription = null,
-                            tint = colorTextGray,
+                            contentDescription = "Ver Contraseña",
+                            tint = colorResource(R.color.serena_icon_gray),
                             modifier = Modifier.size(18.dp)
                         )
                     }
                 },
                 singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 visualTransformation = if (claveVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                isError = errorClave,
                 shape = RoundedCornerShape(50),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = colorInputBackground,
-                    unfocusedContainerColor = colorInputBackground,
+                    focusedTextColor = colorResource(R.color.serena_text_dark),
+                    unfocusedTextColor = colorResource(R.color.serena_text_dark),
+                    focusedContainerColor = colorResource(R.color.serena_bg_input),
+                    unfocusedContainerColor = colorResource(R.color.serena_bg_input),
+                    errorContainerColor = colorResource(R.color.serena_bg_input),
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
+                    unfocusedIndicatorColor = Color.Transparent,
+                    errorIndicatorColor = Color.Transparent
                 ),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                supportingText = {
+                    if (errorClave) {
+                        val errorMessage = when {
+                            clave.isEmpty() -> "La contraseña es obligatoria"
+                            clave.length < 8 -> "Debe tener más de 8 caracteres"
+                            !clave.any { it.isUpperCase() } -> "Debe tener una letra mayúscula"
+                            !clave.any { it.isDigit() } -> "Debe tener al menos un número"
+                            !clave.any { !it.isLetterOrDigit() } -> "Debe tener un caracter especial"
+                            else -> ""
+                        }
+                        if (errorMessage.isNotEmpty()) Text(text = errorMessage, color = Color.Red, fontSize = 10.sp)
+                    }
+                }
             )
         }
+        Spacer(modifier = Modifier.weight(1f))
 
-        Spacer(modifier = Modifier.height(20.dp))
 
-        // accion principal para guardar datos
+        //Guardar
         Button(
-            onClick = { onRegisterSuccess() },
+            onClick = {
+                val isValidNombres = nombres.isNotBlank()
+                val isValidEmail = email.isNotBlank() && email.contains("@")
+                val isValidClave = clave.length >= 8 &&
+                        clave.any { it.isUpperCase() } &&
+                        clave.any { it.isDigit() } &&
+                        clave.any { !it.isLetterOrDigit() }
+
+                errorNombres = !isValidNombres
+                errorEmail = !isValidEmail
+                errorClave = !isValidClave
+
+                // Solo si todo es válido, navega o ejecuta el registro
+                if (isValidNombres && isValidEmail && isValidClave) {
+                    onRegisterSuccess()
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
             shape = RoundedCornerShape(50),
-            colors = ButtonDefaults.buttonColors(containerColor = colorPrimaryGreen)
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorResource(R.color.serena_green_primary)
+            ),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
         ) {
-            Text(text = "Guardar", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+            Text(
+                text = "Guardar",
+                color = colorResource(R.color.white),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
         }
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -215,73 +359,36 @@ fun RegisterScreen(
         Text(
             text = "Tus datos están protegidos en tu espacio seguro de Serena",
             fontSize = 10.sp,
-            color = colorTextGray,
+            color = colorResource(R.color.serena_text_gray),
             textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // enlace para volver al login si ya tiene cuenta
+        // Redirección a Login
         Text(
             text = buildAnnotatedString {
-                withStyle(SpanStyle(color = colorTextGray)) { append("¿Ya tienes una cuenta? ") }
-                withStyle(SpanStyle(color = colorDarkGreen, fontWeight = FontWeight.Bold)) { append("Inicia sesión") }
+                withStyle(SpanStyle(color = colorResource(R.color.serena_text_gray))) {
+                    append("¿Ya tienes una cuenta? ")
+                }
+                withStyle(
+                    SpanStyle(
+                        color = colorResource(R.color.serena_green_dark),
+                        fontWeight = FontWeight.Bold
+                    )
+                ) {
+                    append("Inicia sesión")
+                }
             },
-            modifier = Modifier.clickable { onNavigateToLogin() },
+            modifier = Modifier
+                .clickable { onNavigateToLogin() }
+                .padding(bottom = 8.dp),
             fontSize = 12.sp
         )
     }
 }
 
-// componente reutilizable para no repetir codigo en los textfields normales
-@Composable
-private fun RegisterTextField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    iconResId: Int,
-    keyboardType: KeyboardType = KeyboardType.Text
-) {
-    val colorInputBackground = Color(0xFFF3F4EE)
-    val colorTextDark = Color(0xFF333333)
-    val colorTextGray = Color(0xFF7A7A7A)
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = label,
-            color = colorTextDark,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
-        )
-        TextField(
-            value = value,
-            onValueChange = onValueChange,
-            placeholder = { Text(placeholder, color = colorTextGray, fontSize = 12.sp) },
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = iconResId),
-                    contentDescription = null,
-                    tint = colorTextGray,
-                    modifier = Modifier.size(18.dp)
-                )
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            shape = RoundedCornerShape(50),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = colorInputBackground,
-                unfocusedContainerColor = colorInputBackground,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-@Preview(showBackground = true, heightDp = 700)
+@Preview(showBackground = true, heightDp = 750)
 @Composable
 fun RegisterScreenPreview() {
     SerenaAppTheme {

@@ -11,13 +11,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -64,29 +67,23 @@ fun LoginScreen(
     var errorEmail by remember { mutableStateOf(false) }
     var errorClave by remember { mutableStateOf(false) }
 
-    val colorPrimaryGreen = Color(0xFF81A282)
-    val colorLightGreen = Color(0xFFE9F0E8)
-    val colorDarkGreen = Color(0xFF5E7F65)
-    val colorInputBackground = Color(0xFFF3F4EE)
-    val colorTextDark = Color(0xFF333333)
-    val colorTextGray = Color(0xFF7A7A7A)
-
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(
-                color = colorResource(R.color.verde_100)
-            )
+            .background(color = colorResource(R.color.white))
+            .verticalScroll(rememberScrollState())
+            .imePadding()
             .padding(horizontal = 24.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Mensaje superior flotante
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
         ) {
             Surface(
                 shape = RoundedCornerShape(50),
-                color = colorLightGreen,
+                color = colorResource(R.color.serena_green_light),
                 modifier = Modifier.clickable { }
             ) {
                 Row(
@@ -94,71 +91,73 @@ fun LoginScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.icon_email),
+                        painter = painterResource(R.drawable.icon_hoja),
                         contentDescription = "Hoja",
                         modifier = Modifier.size(12.dp),
-                        tint = colorDarkGreen
+                        tint = colorResource(R.color.serena_green_dark)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "Tómate un respiro",
                         fontSize = 11.sp,
-                        color = colorDarkGreen,
+                        color = colorResource(R.color.serena_green_dark),
                         fontWeight = FontWeight.Medium
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
+        // Logo e icono destacado
         Box(contentAlignment = Alignment.Center) {
             Image(
                 painter = painterResource(id = R.drawable.logo_serena),
                 contentDescription = "Logo Serena",
-                modifier = Modifier.size(150.dp)
+                modifier = Modifier.size(180.dp)
             )
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .offset(x = (-4).dp, y = (-4).dp)
+                    .offset(x = (-16).dp, y = (-15).dp)
                     .size(22.dp)
-                    .clip(CircleShape)
-                    .background(Color.White),
+                    .clip(CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.logo_serena),
+                    painter = painterResource(R.drawable.icon_corazon),
                     contentDescription = "Corazón",
-                    tint = colorDarkGreen,
-                    modifier = Modifier.size(12.dp)
+                    tint = colorResource(R.color.serena_green_dark),
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Título y subtítulo
         Text(
             text = "Bienvenid@ de nuevo",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = colorTextDark
+            color = colorResource(R.color.serena_text_dark)
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = "Comienza tu viaje de entendimiento,\ncalma mental y escucha interior.",
-            color = colorTextGray,
+            color = colorResource(R.color.serena_text_gray),
             fontSize = 12.sp,
             textAlign = TextAlign.Center,
-            lineHeight = 16.sp // junte un poco las lineas
+            lineHeight = 16.sp
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Campo: Correo electrónico
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = "Correo electrónico",
-                color = colorTextDark,
+                color = colorResource(R.color.serena_text_dark),
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
@@ -172,7 +171,7 @@ fun LoginScreen(
                 placeholder = {
                     Text(
                         text = "ejemplo@correo.com",
-                        color = colorTextGray,
+                        color = colorResource(R.color.serena_text_gray),
                         fontSize = 12.sp
                     )
                 },
@@ -180,7 +179,7 @@ fun LoginScreen(
                     Icon(
                         painter = painterResource(R.drawable.icon_email),
                         contentDescription = "Icono Email",
-                        tint = colorTextGray,
+                        tint = colorResource(R.color.serena_icon_gray),
                         modifier = Modifier.size(18.dp)
                     )
                 },
@@ -189,9 +188,11 @@ fun LoginScreen(
                 isError = errorEmail,
                 shape = RoundedCornerShape(50),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = colorInputBackground,
-                    unfocusedContainerColor = colorInputBackground,
-                    errorContainerColor = colorInputBackground,
+                    focusedTextColor = colorResource(R.color.serena_text_dark),
+                    unfocusedTextColor = colorResource(R.color.serena_text_dark),
+                    focusedContainerColor = colorResource(R.color.serena_bg_input),
+                    unfocusedContainerColor = colorResource(R.color.serena_bg_input),
+                    errorContainerColor = colorResource(R.color.serena_bg_input),
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                     errorIndicatorColor = Color.Transparent
@@ -211,10 +212,11 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Campo: Contraseña
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = "Contraseña",
-                color = colorTextDark,
+                color = colorResource(R.color.serena_text_dark),
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
@@ -228,7 +230,7 @@ fun LoginScreen(
                 placeholder = {
                     Text(
                         text = "Escribe tu clave aquí",
-                        color = colorTextGray,
+                        color = colorResource(R.color.serena_text_gray),
                         fontSize = 12.sp
                     )
                 },
@@ -236,7 +238,7 @@ fun LoginScreen(
                     Icon(
                         painter = painterResource(R.drawable.icon_candado),
                         contentDescription = "Icono Candado",
-                        tint = colorTextGray,
+                        tint = colorResource(R.color.serena_icon_gray),
                         modifier = Modifier.size(18.dp)
                     )
                 },
@@ -247,7 +249,7 @@ fun LoginScreen(
                                 if (claveVisible) R.drawable.icon_ojoabierto else R.drawable.icon_ojocerrado
                             ),
                             contentDescription = "Ver Contraseña",
-                            tint = colorTextGray,
+                            tint = colorResource(R.color.serena_icon_gray),
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -258,9 +260,11 @@ fun LoginScreen(
                 isError = errorClave,
                 shape = RoundedCornerShape(50),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = colorInputBackground,
-                    unfocusedContainerColor = colorInputBackground,
-                    errorContainerColor = colorInputBackground,
+                    focusedTextColor = colorResource(R.color.serena_text_dark),
+                    unfocusedTextColor = colorResource(R.color.serena_text_dark),
+                    focusedContainerColor = colorResource(R.color.serena_bg_input),
+                    unfocusedContainerColor = colorResource(R.color.serena_bg_input),
+                    errorContainerColor = colorResource(R.color.serena_bg_input),
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                     errorIndicatorColor = Color.Transparent
@@ -284,18 +288,29 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Botón Iniciar Sesión
         Button(
             onClick = {
-                if (email.isEmpty() || !email.contains("@")) errorEmail = true
-                if (clave.isEmpty() || clave.length < 8 || !clave.any { it.isUpperCase() } || !clave.any { it.isDigit() } || !clave.any { !it.isLetterOrDigit() }) {
-                    errorClave = true
+                val isValidEmail = email.isNotBlank() && email.contains("@")
+                val isValidClave = clave.length >= 8 &&
+                        clave.any { it.isUpperCase() } &&
+                        clave.any { it.isDigit() } &&
+                        clave.any { !it.isLetterOrDigit() }
+
+                errorEmail = !isValidEmail
+                errorClave = !isValidClave
+
+                if (isValidEmail && isValidClave) {
+                    onLoginSuccess()
                 }
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
             shape = RoundedCornerShape(50),
-            colors = ButtonDefaults.buttonColors(containerColor = colorPrimaryGreen),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorResource(R.color.serena_green_primary)
+            ),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
         ) {
             Row(
@@ -304,7 +319,7 @@ fun LoginScreen(
             ) {
                 Text(
                     text = "Iniciar Sesión",
-                    color = Color.White,
+                    color = colorResource(R.color.white),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -312,7 +327,7 @@ fun LoginScreen(
                 Icon(
                     painter = painterResource(id = R.drawable.icon_flechalogin),
                     contentDescription = "Flecha",
-                    tint = Color.White,
+                    tint = colorResource(R.color.white),
                     modifier = Modifier.size(16.dp)
                 )
             }
@@ -320,12 +335,18 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
+        // Enlace hacia Registro
         Text(
             text = buildAnnotatedString {
-                withStyle(style = SpanStyle(color = colorTextGray)) {
+                withStyle(style = SpanStyle(color = colorResource(R.color.serena_text_gray))) {
                     append("¿No tienes una cuenta? ")
                 }
-                withStyle(style = SpanStyle(color = colorDarkGreen, fontWeight = FontWeight.Bold)) {
+                withStyle(
+                    style = SpanStyle(
+                        color = colorResource(R.color.serena_green_dark),
+                        fontWeight = FontWeight.Bold
+                    )
+                ) {
                     append("Regístrate aquí")
                 }
             },
