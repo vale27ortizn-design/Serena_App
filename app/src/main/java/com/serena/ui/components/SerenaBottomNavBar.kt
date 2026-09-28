@@ -43,25 +43,25 @@ fun SerenaBottomNavBar(
     ) {
         NavItem(
             label = "Inicio",
-            iconRes = R.drawable.icon_email,
+            iconRes = R.drawable.icon_inicio,
             isSelected = currentTab == SerenaTab.INICIO,
             onClick = { onTabSelected(SerenaTab.INICIO) }
         )
         NavItem(
             label = "Diario",
-            iconRes = R.drawable.icon_candado,
+            iconRes = R.drawable.icon_diario,
             isSelected = currentTab == SerenaTab.DIARIO,
             onClick = { onTabSelected(SerenaTab.DIARIO) }
         )
         NavItem(
             label = "Chat",
-            iconRes = R.drawable.icon_email,
+            iconRes = R.drawable.icon_chat,
             isSelected = currentTab == SerenaTab.CHAT,
             onClick = { onTabSelected(SerenaTab.CHAT) }
         )
         NavItem(
             label = "Perfil",
-            iconRes = R.drawable.icon_email,
+            iconRes = R.drawable.icon_perfil,
             isSelected = currentTab == SerenaTab.PERFIL,
             onClick = { onTabSelected(SerenaTab.PERFIL) }
         )

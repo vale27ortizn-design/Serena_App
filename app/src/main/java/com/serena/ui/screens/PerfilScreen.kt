@@ -20,8 +20,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -54,7 +54,7 @@ fun PerfilScreen(
         topBar = {
             SerenaTopBar(
                 title = "Perfil",
-                onNotificationClick = { /* Acción notificaciones */ }
+                onNotificationClick = { /* notificaciones */ }
             )
         },
         bottomBar = {
@@ -73,7 +73,7 @@ fun PerfilScreen(
                 .padding(horizontal = 20.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Card Principal de Perfil (Fondo Beige/Crema)
+            // Card Principal de Perfil
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
@@ -88,7 +88,7 @@ fun PerfilScreen(
                         // Avatar con botón de Cámara
                         Box {
                             Image(
-                                painter = painterResource(id = R.drawable.logo_serena), // Cambiar por tu foto de perfil
+                                painter = painterResource(id = R.drawable.logo_serena),
                                 contentDescription = "Foto de Perfil",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
@@ -107,7 +107,7 @@ fun PerfilScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    painter = painterResource(id = R.drawable.icon_email), // Cambiar por ícono cámara
+                                    painter = painterResource(id = R.drawable.icon_camara),
                                     contentDescription = "Cambiar Foto",
                                     tint = Color.White,
                                     modifier = Modifier.size(12.dp)
@@ -136,7 +136,7 @@ fun PerfilScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Banner de Días Consecutivos (Tarjeta Blanca interna)
+                    // Banner de Días Consecutivos
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
@@ -156,7 +156,7 @@ fun PerfilScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        painter = painterResource(id = R.drawable.icon_email), // Ícono Fuego/Hojas
+                                        painter = painterResource(id = R.drawable.icon_fuego),
                                         contentDescription = "Racha",
                                         tint = colorResource(R.color.serena_green_dark),
                                         modifier = Modifier.size(18.dp)
@@ -187,7 +187,7 @@ fun PerfilScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    painter = painterResource(id = R.drawable.icon_email), // Ícono Check
+                                    painter = painterResource(id = R.drawable.icon_verificado),
                                     contentDescription = "Verificado",
                                     tint = colorResource(R.color.serena_green_dark),
                                     modifier = Modifier.size(14.dp)
@@ -230,7 +230,6 @@ fun PerfilScreen(
                 Column(modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp)) {
                     // Nombre Completo
                     DatoPersonalItem(
-                        iconRes = R.drawable.icon_email, // Ícono Usuario
                         label = "Nombre completo",
                         value = "Fernanda Navarro"
                     )
@@ -239,7 +238,6 @@ fun PerfilScreen(
 
                     // Correo Electrónico
                     DatoPersonalItem(
-                        iconRes = R.drawable.icon_email,
                         label = "Correo electrónico",
                         value = "fer.navo@email.com"
                     )
@@ -261,21 +259,21 @@ fun PerfilScreen(
 
             // Opciones de Seguridad y Bienestar
             OpcionAjusteItem(
-                iconRes = R.drawable.icon_candado,
+                iconRes = R.drawable.icon_cambiarcontra,
                 titulo = "Cambiar contraseña",
                 subtitulo = "Actualizada hace 2 meses",
                 onClick = { }
             )
             Spacer(modifier = Modifier.height(8.dp))
             OpcionAjusteItem(
-                iconRes = R.drawable.icon_email,
+                iconRes = R.drawable.icon_noticalma,
                 titulo = "Recordatorios de calma",
                 subtitulo = "Notificaciones suaves y respiración diaria",
                 onClick = { }
             )
             Spacer(modifier = Modifier.height(8.dp))
             OpcionAjusteItem(
-                iconRes = R.drawable.icon_candado,
+                iconRes = R.drawable.icon_escudo,
                 titulo = "Privacidad del diario",
                 subtitulo = "Tus reflexiones están encriptadas",
                 onClick = { }
@@ -297,7 +295,7 @@ fun PerfilScreen(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        painter = painterResource(id = R.drawable.icon_flechalogin), // Ícono Salir
+                        painter = painterResource(id = R.drawable.icon_salir),
                         contentDescription = "Cerrar sesión",
                         tint = colorResource(R.color.serena_green_dark),
                         modifier = Modifier.size(16.dp)
@@ -320,7 +318,7 @@ fun PerfilScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.icon_email),
+                    painter = painterResource(id = R.drawable.icon_hojita),
                     contentDescription = null,
                     tint = colorResource(R.color.serena_green_dark),
                     modifier = Modifier.size(12.dp)
@@ -348,7 +346,6 @@ fun PerfilScreen(
 // Sub-componente para los ítems de Datos Personales
 @Composable
 private fun DatoPersonalItem(
-    iconRes: Int,
     label: String,
     value: String
 ) {
@@ -359,27 +356,18 @@ private fun DatoPersonalItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(id = iconRes),
-                contentDescription = null,
-                tint = colorResource(R.color.serena_text_gray),
-                modifier = Modifier.size(16.dp)
+        Column {
+            Text(
+                text = label,
+                fontSize = 10.sp,
+                color = colorResource(R.color.serena_text_gray)
             )
-            Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text(
-                    text = label,
-                    fontSize = 10.sp,
-                    color = colorResource(R.color.serena_text_gray)
-                )
-                Text(
-                    text = value,
-                    fontSize = 13.sp,
-                    color = colorResource(R.color.serena_text_dark),
-                    fontWeight = FontWeight.Medium
-                )
-            }
+            Text(
+                text = value,
+                fontSize = 13.sp,
+                color = colorResource(R.color.serena_text_dark),
+                fontWeight = FontWeight.Medium
+            )
         }
 
         // Ícono Check
@@ -391,10 +379,10 @@ private fun DatoPersonalItem(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.icon_email), // Reemplazar por checkmark
+                painter = painterResource(id = R.drawable.icon_check),
                 contentDescription = "OK",
                 tint = colorResource(R.color.serena_green_dark),
-                modifier = Modifier.size(10.dp)
+                modifier = Modifier.size(15.dp)
             )
         }
     }
@@ -449,7 +437,7 @@ private fun OpcionAjusteItem(
 
         // Flecha a la derecha
         Icon(
-            painter = painterResource(id = R.drawable.icon_flechalogin), // Cambiar por flecha a la derecha '>'
+            painter = painterResource(id = R.drawable.icon_flechalogin),
             contentDescription = "Siguiente",
             tint = colorResource(R.color.serena_text_gray),
             modifier = Modifier.size(14.dp)

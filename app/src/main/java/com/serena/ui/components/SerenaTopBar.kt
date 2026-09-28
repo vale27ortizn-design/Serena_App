@@ -80,7 +80,7 @@ fun SerenaTopBar(
         ) {
             IconButton(onClick = onNotificationClick) {
                 Icon(
-                    painter = painterResource(id = R.drawable.icon_email), // O tu ícono de campana/notificación
+                    painter = painterResource(id = R.drawable.icon_notis),
                     contentDescription = "Notificaciones",
                     tint = Color.White,
                     modifier = Modifier.size(18.dp)

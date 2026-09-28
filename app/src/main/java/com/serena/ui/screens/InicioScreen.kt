@@ -86,7 +86,7 @@ fun InicioScreen(
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
-                color = Color(0xFFF6F4EE) // Fondo beige claro suave
+                color = colorResource(R.color.serena_card_sintonia_bg)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(
@@ -96,7 +96,7 @@ fun InicioScreen(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                painter = painterResource(id = R.drawable.icon_email), // Ícono de planta / foco
+                                painter = painterResource(id = R.drawable.icon_cartitainterrogacion),
                                 contentDescription = null,
                                 tint = colorResource(R.color.serena_green_dark),
                                 modifier = Modifier.size(16.dp)
@@ -113,7 +113,7 @@ fun InicioScreen(
                         // Badge "Actualizado hace 2h"
                         Surface(
                             shape = RoundedCornerShape(50),
-                            color = Color(0xFFEDE9E3)
+                            color = colorResource(R.color.serena_badge_bg)
                         ) {
                             Text(
                                 text = "Actualizado hace 2h",
@@ -130,9 +130,9 @@ fun InicioScreen(
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        EmotionChip(label = "En calma", iconRes = R.drawable.icon_email, isSelected = true)
-                        EmotionChip(label = "Agradecida", iconRes = R.drawable.icon_email, isSelected = false)
-                        EmotionChip(label = "Cansada", iconRes = R.drawable.icon_email, isSelected = false)
+                        EmotionChip(label = "En calma", iconRes = R.drawable.icon_hoja, isSelected = true)
+                        EmotionChip(label = "Agradecida", iconRes = R.drawable.text_estrellitas, isSelected = false)
+                        EmotionChip(label = "Cansada", iconRes = R.drawable.icon_nubecita, isSelected = false)
                     }
                 }
             }
@@ -141,9 +141,9 @@ fun InicioScreen(
 
             // Card 2: Hablar con Serena (Navega al Chat)
             ActionCard(
-                backgroundColor = Color(0xFFDFD5C6), // Tono beige tierra suave
-                iconBgColor = Color(0xFFECE5DB),
-                iconRes = R.drawable.icon_email, // Ícono de Planta en maceta / Asistente
+                backgroundColor = colorResource(R.color.serena_card_chat_bg),
+                iconBgColor = colorResource(R.color.serena_card_chat_icon_bg),
+                iconRes = R.drawable.icon_maceta,
                 title = "Hablar con Serena",
                 description = "Tu asistente de apoyo emocional siempre disponible para escucharte y acompañarte.",
                 onClick = { onNavigateToTab(SerenaTab.CHAT) }
@@ -153,9 +153,9 @@ fun InicioScreen(
 
             // Card 3: Mi Diario Emocional (Navega al Diario)
             ActionCard(
-                backgroundColor = Color(0xFFF3ECE1), // Tono beige cálido claro
-                iconBgColor = Color(0xFFF9F5EE),
-                iconRes = R.drawable.icon_candado, // Ícono de Libro / Diario
+                backgroundColor = colorResource(R.color.serena_card_diario_bg),
+                iconBgColor = colorResource(R.color.serena_card_diario_icon_bg),
+                iconRes = R.drawable.icon_libro,
                 title = "Mi Diario Emocional",
                 description = "Registra tus pensamientos, desahoga tus cargas y reflexiona sobre tu crecimiento día a día.",
                 onClick = { onNavigateToTab(SerenaTab.DIARIO) }
@@ -167,7 +167,7 @@ fun InicioScreen(
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
-                color = Color(0xFFE8F1EB) // Tono menta suave
+                color = colorResource(R.color.serena_card_respiro_bg)
             ) {
                 Row(
                     modifier = Modifier.padding(16.dp),
@@ -181,9 +181,9 @@ fun InicioScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.icon_email), // Ícono de viento / respiración
+                            painter = painterResource(id = R.drawable.icon_viento),
                             contentDescription = "Respiración",
-                            tint = Color.White,
+                            tint = colorResource(R.color.white),
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -219,7 +219,7 @@ fun InicioScreen(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Icon(
-                                painter = painterResource(id = R.drawable.icon_flechalogin), // Ícono Play / Flecha
+                                painter = painterResource(id = R.drawable.icon_flechalogin),
                                 contentDescription = null,
                                 tint = colorResource(R.color.serena_green_dark),
                                 modifier = Modifier.size(12.dp)
@@ -243,7 +243,7 @@ private fun EmotionChip(
 ) {
     Surface(
         shape = RoundedCornerShape(50),
-        color = if (isSelected) Color(0xFFE2EDE5) else Color.White
+        color = if (isSelected) colorResource(R.color.serena_chip_selected_bg) else colorResource(R.color.white)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -305,7 +305,7 @@ private fun ActionCard(
                 }
 
                 Icon(
-                    painter = painterResource(id = R.drawable.icon_flechalogin), // Ícono Flecha a la derecha
+                    painter = painterResource(id = R.drawable.icon_flechalogin),
                     contentDescription = "Ir a $title",
                     tint = colorResource(R.color.serena_text_dark),
                     modifier = Modifier.size(16.dp)

@@ -9,7 +9,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- Colores personalizados -->
+    <!-- Colores personalizados  -->
     <color name="serena_green_primary">#81A282</color>  <!-- Botón principal y destacado -->
     <color name="serena_green_light">#E9F0E8</color>    <!-- Fondo de pills/mensajes arriba -->
     <color name="serena_green_dark">#5E7F65</color>     <!-- Texto verde / iconos destacados -->
@@ -17,4 +17,12 @@
     <color name="serena_text_dark">#333333</color>      <!-- Titulares y etiquetas principales -->
     <color name="serena_text_gray">#7A7A7A</color>      <!-- Subtítulos, placeholders y textos secundarios -->
     <color name="serena_icon_gray">#757773</color>      <!-- Tint de iconos dentro de los inputs -->
+    <color name="serena_card_sintonia_bg">#F6F4EE</color>      <!-- Fondo beige claro suave -->
+    <color name="serena_badge_bg">#EDE9E3</color>              <!-- Fondo del badge actualizado -->
+    <color name="serena_chip_selected_bg">#E2EDE5</color>      <!-- Chip de emoción seleccionado -->
+    <color name="serena_card_chat_bg">#DFD5C6</color>          <!-- Tono beige tierra suave -->
+    <color name="serena_card_chat_icon_bg">#ECE5DB</color>     <!-- Fondo del ícono en card chat -->
+    <color name="serena_card_diario_bg">#F3ECE1</color>        <!-- Tono beige cálido claro -->
+    <color name="serena_card_diario_icon_bg">#F9F5EE</color>   <!-- Fondo del ícono en card diario -->
+    <color name="serena_card_respiro_bg">#E8F1EB</color>       <!-- Tono menta suave -->
 </resources>
