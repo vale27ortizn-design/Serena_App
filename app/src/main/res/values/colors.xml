@@ -25,4 +25,10 @@
     <color name="serena_card_diario_bg">#F3ECE1</color>        <!-- Tono beige cálido claro -->
     <color name="serena_card_diario_icon_bg">#F9F5EE</color>   <!-- Fondo del ícono en card diario -->
     <color name="serena_card_respiro_bg">#E8F1EB</color>       <!-- Tono menta suave -->
+    <color name="serena_search_border">#EAEAEA</color>          <!-- Borde gris claro del buscador -->
+    <color name="serena_chip_unselected_bg">#F2F2F2</color>     <!-- Fondo gris de los chips no seleccionados -->
+    <color name="serena_card_reflexion_bg">#F0F5F1</color>      <!-- Fondo verde muy claro de la reflexión -->
+    <color name="serena_card_entry_bg">#D4C9B8</color>          <!-- Fondo beige/marrón de las entradas del diario -->
+    <color name="serena_fab_bg">#83A484</color>                 <!-- Fondo verde del botón flotante (+) -->
+    <color name="serena_streak_bg">#E2EDE5</color>              <!-- Fondo del pill de 14 días activos -->
 </resources>
