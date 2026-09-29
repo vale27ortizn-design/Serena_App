@@ -9,6 +9,7 @@ import com.serena.ui.components.SerenaTab
 import com.serena.ui.screens.DiarioScreen
 import com.serena.ui.screens.InicioScreen
 import com.serena.ui.screens.LoginScreen
+import com.serena.ui.screens.NuevoDiarioScreen
 import com.serena.ui.screens.PerfilScreen
 import com.serena.ui.screens.RegisterScreen
 import com.serena.ui.screens.RespiracionScreen // <- Asegúrate de importar tu pantalla
@@ -117,7 +118,23 @@ fun AppNavigation(
                     }
                 },
                 onNewEntryClick = {
-                    // navController.navigate("nuevo-diario")
+                    navController.navigate("nuevo-diario")
+                }
+            )
+        }
+
+        // Pantalla de Nuevo Diario
+        // Pantalla de Nuevo Diario
+        composable("nuevo-diario") {
+            NuevoDiarioScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onNotificationClick = {
+                    // notis
+                },
+                onSaveClick = {
+                    navController.navigate("diario") { popUpTo("diario") { inclusive = true } }
                 }
             )
         }
