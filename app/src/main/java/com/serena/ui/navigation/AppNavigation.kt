@@ -11,6 +11,7 @@ import com.serena.ui.screens.InicioScreen
 import com.serena.ui.screens.LoginScreen
 import com.serena.ui.screens.PerfilScreen
 import com.serena.ui.screens.RegisterScreen
+import com.serena.ui.screens.RespiracionScreen // <- Asegúrate de importar tu pantalla
 
 @Composable
 fun AppNavigation(
@@ -27,9 +28,7 @@ fun AppNavigation(
         composable("login") {
             LoginScreen(
                 onLoginSuccess = {
-                    // Navega al inicio y borra el Login del historial
                     navController.navigate("menu-inicio") {
-                        //boton de "atras" no lo deja regresar al login, cunado este en inico
                         popUpTo("login") { inclusive = true }
                     }
                 },
@@ -69,7 +68,8 @@ fun AppNavigation(
                     }
                 },
                 onStartBreathingClick = {
-                    // respracion
+                    // ¡Aquí navegamos a la pantalla de respiración!
+                    navController.navigate("respiracion")
                 }
             )
         }
@@ -99,8 +99,8 @@ fun AppNavigation(
             )
         }
 
-        //Patanlla de Diario
-        composable("diario"){
+        // Pantalla de Diario
+        composable("diario") {
             DiarioScreen(
                 onNavigateToTab = { tab ->
                     when (tab) {
@@ -115,6 +115,18 @@ fun AppNavigation(
                             navController.navigate("perfil")
                         }
                     }
+                },
+                onNewEntryClick = {
+                    // navController.navigate("nuevo-diario")
+                }
+            )
+        }
+
+        //
+        composable("respiracion") {
+            RespiracionScreen(
+                onBackClick = {
+                    navController.popBackStack()
                 }
             )
         }
