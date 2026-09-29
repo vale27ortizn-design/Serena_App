@@ -6,13 +6,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.serena.ui.components.SerenaTab
+import com.serena.ui.screens.ChatScreen
+import com.serena.ui.screens.DetalleDiarioScreen
 import com.serena.ui.screens.DiarioScreen
 import com.serena.ui.screens.InicioScreen
 import com.serena.ui.screens.LoginScreen
 import com.serena.ui.screens.NuevoDiarioScreen
 import com.serena.ui.screens.PerfilScreen
 import com.serena.ui.screens.RegisterScreen
-import com.serena.ui.screens.RespiracionScreen // <- Asegúrate de importar tu pantalla
+import com.serena.ui.screens.RespiracionScreen
 
 @Composable
 fun AppNavigation(
@@ -64,12 +66,11 @@ fun AppNavigation(
                             navController.navigate("diario")
                         }
                         SerenaTab.CHAT -> {
-                            // navController.navigate("chat")
+                            navController.navigate("chat") // <-- DESCOMENTADO AQUÍ
                         }
                     }
                 },
                 onStartBreathingClick = {
-                    // ¡Aquí navegamos a la pantalla de respiración!
                     navController.navigate("respiracion")
                 }
             )
@@ -87,7 +88,7 @@ fun AppNavigation(
                             navController.navigate("diario")
                         }
                         SerenaTab.CHAT -> {
-                            // navController.navigate("chat")
+                            navController.navigate("chat") // <-- DESCOMENTADO AQUÍ
                         }
                         SerenaTab.PERFIL -> {}
                     }
@@ -110,7 +111,7 @@ fun AppNavigation(
                         }
                         SerenaTab.DIARIO -> {}
                         SerenaTab.CHAT -> {
-                            // navController.navigate("chat")
+                            navController.navigate("chat") // <-- DESCOMENTADO AQUÍ
                         }
                         SerenaTab.PERFIL -> {
                             navController.navigate("perfil")
@@ -119,11 +120,40 @@ fun AppNavigation(
                 },
                 onNewEntryClick = {
                     navController.navigate("nuevo-diario")
+                },
+                onEntryClick = {
+                    navController.navigate("detalle-diario")
                 }
             )
         }
 
-        // Pantalla de Nuevo Diario
+        // Pantalla de Detalle de Diario
+        composable("detalle-diario") {
+            DetalleDiarioScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onEditClick = {
+                    // Aquí irá la navegación a la pantalla de edición
+                },
+                onDeleteClick = {
+                    navController.popBackStack()
+                },
+                onShareClick = {
+                    // Lógica para abrir el menú de compartir
+                }
+            )
+        }
+
+        // Pantalla de Chat
+        composable("chat") {
+            ChatScreen (
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
         // Pantalla de Nuevo Diario
         composable("nuevo-diario") {
             NuevoDiarioScreen(
@@ -139,7 +169,7 @@ fun AppNavigation(
             )
         }
 
-        //
+        // Pantalla de Respiración
         composable("respiracion") {
             RespiracionScreen(
                 onBackClick = {

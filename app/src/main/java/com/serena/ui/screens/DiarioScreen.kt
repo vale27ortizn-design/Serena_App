@@ -47,7 +47,8 @@ import com.serena.ui.theme.SerenaAppTheme
 fun DiarioScreen(
     modifier: Modifier = Modifier,
     onNavigateToTab: (SerenaTab) -> Unit = {},
-    onNewEntryClick: () -> Unit = {}
+    onNewEntryClick: () -> Unit = {},
+    onEntryClick: () -> Unit = {} // <-- 1. Añadimos el parámetro aquí
 ) {
     Scaffold(
         topBar = {
@@ -143,12 +144,14 @@ fun DiarioScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Lista de Entradas del Diario
+            // 2. Pasamos el evento onClick a cada tarjeta
             JournalEntryCard(
                 fecha = "Hoy, 29 Septiembre",
                 emocion = "Tranquila",
                 emocionIconRes = R.drawable.icon_paztranquilidad,
                 contenido = "Hoy me tomé 10 minutos para caminar bajo el sol y sentí mucha paz mental. Dejar el...",
-                hora = "16:45 hs"
+                hora = "16:45 hs",
+                onClick = onEntryClick
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -158,7 +161,8 @@ fun DiarioScreen(
                 emocion = "Con esperanza",
                 emocionIconRes = R.drawable.icon_solnube,
                 contenido = "Logré terminar mi proyecto a tiempo. Aunque hubo tensión, pude respirar profundo y con...",
-                hora = "20:15 hs"
+                hora = "20:15 hs",
+                onClick = onEntryClick
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -168,7 +172,8 @@ fun DiarioScreen(
                 emocion = "Algo abrumada",
                 emocionIconRes = R.drawable.icon_nubellorando,
                 contenido = "Hoy es un día con muchas tareas pendientes. Serena me sugirió priorizar y me ayudó a...",
-                hora = "11:30 hs"
+                hora = "11:30 hs",
+                onClick = onEntryClick
             )
 
             Spacer(modifier = Modifier.height(80.dp))
@@ -198,7 +203,7 @@ private fun FilterChipItem(
                 Icon(
                     painter = painterResource(id = iconRes),
                     contentDescription = null,
-                    tint = Color.Unspecified, // Mantiene los colores originales de los íconos emocionales
+                    tint = Color.Unspecified,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
@@ -268,10 +273,13 @@ private fun JournalEntryCard(
     emocion: String,
     emocionIconRes: Int,
     contenido: String,
-    hora: String
+    hora: String,
+    onClick: () -> Unit = {} // <-- 3. Añadimos el parámetro al subcomponente
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }, // <-- 4. Hacemos toda la tarjeta clickeable
         shape = RoundedCornerShape(20.dp),
         color = colorResource(R.color.serena_card_entry_bg)
     ) {
@@ -301,7 +309,7 @@ private fun JournalEntryCard(
                         Icon(
                             painter = painterResource(id = emocionIconRes),
                             contentDescription = emocion,
-                            tint = Color.Unspecified, // Conserva los colores originales del drawable
+                            tint = Color.Unspecified,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
@@ -355,7 +363,7 @@ private fun JournalEntryCard(
                         .size(28.dp)
                         .clip(CircleShape)
                         .background(colorResource(R.color.white))
-                        .clickable { /* Acción navegar al detalle de la entrada */ },
+                        .clickable { onClick() }, // <-- 5. También agregamos el clic aquí por si el usuario toca la flecha
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
