@@ -65,11 +65,11 @@ fun NuevoDiarioScreen(
     // --- EMOJIS (Nombres exactos de drawable) ---
     val listaEmociones = listOf(
         EmocionData("Feliz", R.drawable.emoji_feliz),
-        EmocionData("Tranquila", R.drawable.emoji_tranquil),
+        EmocionData("Tranquila", R.drawable.emoji_tranquila),
         EmocionData("Ansiosa", R.drawable.emoji_ansiosa),
         EmocionData("Cansada", R.drawable.emoji_cansada),
         EmocionData("Triste", R.drawable.emoji_triste),
-        EmocionData("Frustrada", R.drawable.emoji_enojada)
+        EmocionData("Frustrada", R.drawable.emoji_frustada)
     )
 
     // --- INFLUENCIAS CON SUS ICONOS CORRESPONDIENTES ---
