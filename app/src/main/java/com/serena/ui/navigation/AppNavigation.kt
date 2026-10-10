@@ -6,13 +6,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.serena.ui.components.SerenaTab
+import com.serena.ui.screens.AterrizajeScreen
+import com.serena.ui.screens.CatarsisScreen
 import com.serena.ui.screens.ChatScreen
 import com.serena.ui.screens.DetalleDiarioScreen
 import com.serena.ui.screens.DiarioScreen
+import com.serena.ui.screens.EjerciciosScreen
 import com.serena.ui.screens.InicioScreen
 import com.serena.ui.screens.LoginScreen
 import com.serena.ui.screens.NuevoDiarioScreen
 import com.serena.ui.screens.PerfilScreen
+import com.serena.ui.screens.RefuerzoPositivoScreen
 import com.serena.ui.screens.RegisterScreen
 import com.serena.ui.screens.RespiracionScreen
 
@@ -59,19 +63,13 @@ fun AppNavigation(
                 onNavigateToTab = { tab ->
                     when (tab) {
                         SerenaTab.INICIO -> {}
-                        SerenaTab.PERFIL -> {
-                            navController.navigate("perfil")
-                        }
-                        SerenaTab.DIARIO -> {
-                            navController.navigate("diario")
-                        }
-                        SerenaTab.CHAT -> {
-                            navController.navigate("chat") // <-- DESCOMENTADO AQUÍ
-                        }
+                        SerenaTab.PERFIL -> { navController.navigate("perfil") }
+                        SerenaTab.DIARIO -> { navController.navigate("diario") }
+                        SerenaTab.CHAT -> { navController.navigate("chat") }
                     }
                 },
-                onStartBreathingClick = {
-                    navController.navigate("respiracion")
+                onNavigateToBotiquin = {
+                    navController.navigate("ejercicios") // Nueva ruta general
                 }
             )
         }
@@ -175,6 +173,41 @@ fun AppNavigation(
                 onBackClick = {
                     navController.popBackStack()
                 }
+            )
+        }
+
+        // Menú principal del Botiquín Emocional
+        composable("ejercicios") {
+            EjerciciosScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onNavigateToExercise = { rutaEjercicio ->
+                    // Navega a la ruta que le pasa la tarjeta ("respiracion", "aterrizaje", etc.)
+                    navController.navigate(rutaEjercicio)
+                }
+            )
+        }
+        // Pantalla de Aterrizaje 5-4-3-2-1
+        composable("aterrizaje") {
+            AterrizajeScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Pantalla de Refuerzo Positivo
+        composable("afirmaciones") {
+            RefuerzoPositivoScreen(
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // Pantalla de Catarsis Simbólica
+        composable("liberacion") {
+            CatarsisScreen(
+                onBackClick = { navController.popBackStack() }
             )
         }
     }

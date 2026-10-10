@@ -149,7 +149,7 @@ private fun ChatTopBar(onBackClick: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.logo_serena),
+                    painter = painterResource(id = R.drawable.ic_logo_simple),
                     contentDescription = "Serena Avatar",
                     tint = colorResource(R.color.serena_green_dark),
                     modifier = Modifier.size(24.dp)

@@ -42,7 +42,7 @@ import com.serena.ui.theme.SerenaAppTheme
 fun InicioScreen(
     modifier: Modifier = Modifier,
     onNavigateToTab: (SerenaTab) -> Unit = {},
-    onStartBreathingClick: () -> Unit = {}
+    onNavigateToBotiquin: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -139,7 +139,7 @@ fun InicioScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Card 2: Hablar con Serena (Navega al Chat)
+            // Card 2: Hablar con Serena
             ActionCard(
                 backgroundColor = colorResource(R.color.serena_card_chat_bg),
                 iconBgColor = colorResource(R.color.serena_card_chat_icon_bg),
@@ -151,7 +151,7 @@ fun InicioScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Card 3: Mi Diario Emocional (Navega al Diario)
+            // Card 3: Mi Diario Emocional
             ActionCard(
                 backgroundColor = colorResource(R.color.serena_card_diario_bg),
                 iconBgColor = colorResource(R.color.serena_card_diario_icon_bg),
@@ -163,9 +163,11 @@ fun InicioScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Card 4: Momento de Respiro (Ejercicio de respiración)
+            // Card 4: Botiquín Emocional (Nueva tarjeta general)
             Surface(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onNavigateToBotiquin() },
                 shape = RoundedCornerShape(20.dp),
                 color = colorResource(R.color.serena_card_respiro_bg)
             ) {
@@ -181,8 +183,8 @@ fun InicioScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.icon_viento),
-                            contentDescription = "Respiración",
+                            painter = painterResource(id = R.drawable.icon_corazon),
+                            contentDescription = "Botiquín",
                             tint = colorResource(R.color.white),
                             modifier = Modifier.size(20.dp)
                         )
@@ -192,7 +194,7 @@ fun InicioScreen(
 
                     Column {
                         Text(
-                            text = "MOMENTO DE RESPIRO",
+                            text = "BOTIQUÍN EMOCIONAL",
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             color = colorResource(R.color.serena_green_dark),
@@ -200,7 +202,7 @@ fun InicioScreen(
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "Recuerda inhalar profundo 4 segundos y exhalar suavemente en 6.",
+                            text = "Técnicas y herramientas guiadas para acompañarte según lo que necesites hoy.",
                             fontSize = 12.sp,
                             color = colorResource(R.color.serena_text_dark),
                             lineHeight = 16.sp
@@ -208,11 +210,10 @@ fun InicioScreen(
                         Spacer(modifier = Modifier.height(6.dp))
 
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable { onStartBreathingClick() }
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Comenzar ciclo de respiración",
+                                text = "Explorar herramientas",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colorResource(R.color.serena_green_dark)
@@ -266,7 +267,7 @@ private fun EmotionChip(
     }
 }
 
-// Subcomponente: Tarjeta de Acción Grandes (Hablar con Serena / Mi Diario)
+// Subcomponente: Tarjeta de Acción Grandes
 @Composable
 private fun ActionCard(
     backgroundColor: Color,

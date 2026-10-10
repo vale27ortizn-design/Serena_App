@@ -2,7 +2,6 @@ package com.serena.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -76,23 +76,22 @@ fun LoginScreen(
             .padding(horizontal = 24.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Mensaje superior flotante
+        // Mensaje superior flotante (Buenas prácticas: Sin Modifier.clickable si es decorativo)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
         ) {
             Surface(
                 shape = RoundedCornerShape(50),
-                color = colorResource(R.color.serena_green_light),
-                modifier = Modifier.clickable { }
+                color = colorResource(R.color.serena_green_light)
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.icon_hoja),
-                        contentDescription = "Hoja",
+                        contentDescription = null, // null porque es decorativo
                         modifier = Modifier.size(12.dp),
                         tint = colorResource(R.color.serena_green_dark)
                     )
@@ -109,10 +108,10 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        // Logo e icono destacado
+        // Logo e icono destacado (AQUÍ DEBES USAR TU NUEVO LOGO SVG)
         Box(contentAlignment = Alignment.Center) {
             Image(
-                painter = painterResource(id = R.drawable.logo_serena),
+                painter = painterResource(id = R.drawable.ic_logo_completo_), // <- Cambiado a tu nuevo vector
                 contentDescription = "Logo Serena",
                 modifier = Modifier.size(180.dp)
             )
@@ -126,7 +125,7 @@ fun LoginScreen(
             ) {
                 Icon(
                     painter = painterResource(R.drawable.icon_corazon),
-                    contentDescription = "Corazón",
+                    contentDescription = null,
                     tint = colorResource(R.color.serena_green_dark),
                     modifier = Modifier.size(20.dp)
                 )
@@ -288,7 +287,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón Iniciar Sesión
+        // Botón Iniciar Sesión (Este estaba bien, mantiene su validación y estructura)
         Button(
             onClick = {
                 val isValidEmail = email.isNotBlank() && email.contains("@")
@@ -326,7 +325,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.width(8.dp))
                 Icon(
                     painter = painterResource(id = R.drawable.icon_flechalogin),
-                    contentDescription = "Flecha",
+                    contentDescription = null, // null porque es decorativo
                     tint = colorResource(R.color.white),
                     modifier = Modifier.size(16.dp)
                 )
@@ -335,26 +334,28 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Enlace hacia Registro
-        Text(
-            text = buildAnnotatedString {
-                withStyle(style = SpanStyle(color = colorResource(R.color.serena_text_gray))) {
-                    append("¿No tienes una cuenta? ")
-                }
-                withStyle(
-                    style = SpanStyle(
-                        color = colorResource(R.color.serena_green_dark),
-                        fontWeight = FontWeight.Bold
-                    )
-                ) {
-                    append("Regístrate aquí")
-                }
-            },
-            modifier = Modifier
-                .clickable { onNavigateToRegister() }
-                .padding(bottom = 8.dp),
-            fontSize = 11.sp
-        )
+        // Enlace hacia Registro (Buenas prácticas: Componente TextButton oficial)
+        TextButton(
+            onClick = { onNavigateToRegister() },
+            modifier = Modifier.padding(bottom = 8.dp)
+        ) {
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(color = colorResource(R.color.serena_text_gray))) {
+                        append("¿No tienes una cuenta? ")
+                    }
+                    withStyle(
+                        style = SpanStyle(
+                            color = colorResource(R.color.serena_green_dark),
+                            fontWeight = FontWeight.Bold
+                        )
+                    ) {
+                        append("Regístrate aquí")
+                    }
+                },
+                fontSize = 11.sp
+            )
+        }
     }
 }
 

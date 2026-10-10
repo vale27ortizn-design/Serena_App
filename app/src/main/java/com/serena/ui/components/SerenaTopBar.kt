@@ -53,7 +53,7 @@ fun SerenaTopBar(
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.logo_serena),
+                        painter = painterResource(id = R.drawable.ic_logo_simple),
                         contentDescription = "Logo Serena",
                         modifier = Modifier.size(24.dp)
                     )

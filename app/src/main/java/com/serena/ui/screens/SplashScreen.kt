@@ -54,7 +54,7 @@ fun SplashScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.logo_serena),
+                painter = painterResource(id = R.drawable.ic_logo_completo_),
                 contentDescription = "Logo Serena",
                 modifier = Modifier.size(200.dp),
             )

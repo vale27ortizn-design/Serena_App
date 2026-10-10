@@ -91,6 +91,7 @@ fun NuevoDiarioScreen(
                 onActionClick = onNotificationClick
             )
         },
+
         bottomBar = {
             Column(
                 modifier = Modifier
@@ -99,13 +100,26 @@ fun NuevoDiarioScreen(
                     .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // VARIABLES DE VALIDACIÓN:
+                // Se debe seleccionar una emoción y escribir algo
+                val isFormValid = emocionSeleccionada != null && textoDiario.isNotBlank()
+
                 Button(
-                    onClick = { onSaveClick() },
-                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.serena_green_dark)),
+                    onClick = {
+                        if (isFormValid) {
+                            onSaveClick()
+                        }
+                    },
+                    // Si el formulario es válido, el botón es verde. Si no, es un verde transparente (deshabilitado visualmente)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(id = R.color.serena_green_dark),
+                        disabledContainerColor = colorResource(id = R.color.serena_green_dark).copy(alpha = 0.5f)
+                    ),
                     shape = RoundedCornerShape(50),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(54.dp)
+                        .height(54.dp),
+                    enabled = isFormValid // Bloquea el clic y activa el color 'disabled'
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.icon_check),
