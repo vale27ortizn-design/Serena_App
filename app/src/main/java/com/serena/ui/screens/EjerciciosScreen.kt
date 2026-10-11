@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.serena.R
+import com.serena.ui.navigation.AppDestinations
 import com.serena.ui.theme.SerenaAppTheme
 
 @Composable
@@ -105,7 +106,7 @@ fun EjerciciosScreen(
                 iconRes = R.drawable.icon_viento,
                 tag = "Para relajar",
                 backgroundColor = colorResource(R.color.serena_card_respiro_bg),
-                onClick = { onNavigateToExercise("respiracion") }
+                onClick = { onNavigateToExercise(AppDestinations.ERespiracion.route) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -116,8 +117,8 @@ fun EjerciciosScreen(
                 description = "Ancla tu mente en el presente utilizando tus 5 sentidos para frenar la ansiedad.",
                 iconRes = R.drawable.icon_hoja,
                 tag = "Para la ansiedad",
-                backgroundColor = colorResource(R.color.serena_card_chat_bg), // Usamos el verde del chat
-                onClick = { onNavigateToExercise("aterrizaje") }
+                backgroundColor = colorResource(R.color.serena_card_chat_bg),
+                onClick = { onNavigateToExercise(AppDestinations.EAterrizaje.route) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -129,7 +130,7 @@ fun EjerciciosScreen(
                 iconRes = R.drawable.icon_corazon,
                 tag = "Para motivar",
                 backgroundColor = colorResource(R.color.serena_card_sintonia_bg),
-                onClick = { onNavigateToExercise("afirmaciones") }
+                onClick = { onNavigateToExercise(AppDestinations.RefuerzoPositivo.route) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -140,8 +141,8 @@ fun EjerciciosScreen(
                 description = "Escribe lo que te frustra y libéralo simbólicamente para soltar la carga.",
                 iconRes = R.drawable.icon_libro,
                 tag = "Para soltar",
-                backgroundColor = colorResource(R.color.serena_badge_bg), // Usamos un tono distinto
-                onClick = { onNavigateToExercise("liberacion") }
+                backgroundColor = colorResource(R.color.serena_badge_bg),
+                onClick = { onNavigateToExercise(AppDestinations.ECatarsis.route) }
             )
 
             Spacer(modifier = Modifier.height(24.dp))

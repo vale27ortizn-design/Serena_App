@@ -15,24 +15,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.serena.R
-
-enum class SerenaTab {
-    INICIO, DIARIO, CHAT, PERFIL
-}
+import com.serena.ui.navigation.AppDestinations
 
 @Composable
 fun SerenaBottomNavBar(
-    currentTab: SerenaTab,
-    onTabSelected: (SerenaTab) -> Unit,
+    navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -44,26 +44,66 @@ fun SerenaBottomNavBar(
         NavItem(
             label = "Inicio",
             iconRes = R.drawable.icon_inicio,
-            isSelected = currentTab == SerenaTab.INICIO,
-            onClick = { onTabSelected(SerenaTab.INICIO) }
+            isSelected = currentRoute == AppDestinations.Inicio.route,
+            onClick = {
+                if (currentRoute != AppDestinations.Inicio.route) {
+                    navController.navigate(AppDestinations.Inicio.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            }
         )
         NavItem(
             label = "Diario",
             iconRes = R.drawable.icon_diario,
-            isSelected = currentTab == SerenaTab.DIARIO,
-            onClick = { onTabSelected(SerenaTab.DIARIO) }
+            isSelected = currentRoute == AppDestinations.Diario.route,
+            onClick = {
+                if (currentRoute != AppDestinations.Diario.route) {
+                    navController.navigate(AppDestinations.Diario.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            }
         )
         NavItem(
             label = "Chat",
             iconRes = R.drawable.icon_chat,
-            isSelected = currentTab == SerenaTab.CHAT,
-            onClick = { onTabSelected(SerenaTab.CHAT) }
+            isSelected = currentRoute == AppDestinations.Chat.route,
+            onClick = {
+                if (currentRoute != AppDestinations.Chat.route) {
+                    navController.navigate(AppDestinations.Chat.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            }
         )
         NavItem(
             label = "Perfil",
             iconRes = R.drawable.icon_perfil,
-            isSelected = currentTab == SerenaTab.PERFIL,
-            onClick = { onTabSelected(SerenaTab.PERFIL) }
+            isSelected = currentRoute == AppDestinations.Perfil.route,
+            onClick = {
+                if (currentRoute != AppDestinations.Perfil.route) {
+                    navController.navigate(AppDestinations.Perfil.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            }
         )
     }
 }

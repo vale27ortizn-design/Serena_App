@@ -2,10 +2,9 @@ package com.serena.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.serena.ui.components.SerenaTab
 import com.serena.ui.screens.AterrizajeScreen
 import com.serena.ui.screens.CatarsisScreen
 import com.serena.ui.screens.ChatScreen
@@ -22,31 +21,30 @@ import com.serena.ui.screens.RespiracionScreen
 
 @Composable
 fun AppNavigation(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navController: NavHostController
 ) {
-    val navController = rememberNavController()
-
     NavHost(
         navController = navController,
-        startDestination = "login",
+        startDestination = AppDestinations.InicioSesion.route,
         modifier = modifier,
     ) {
         // Pantalla de Login
-        composable("login") {
+        composable(AppDestinations.InicioSesion.route) {
             LoginScreen(
                 onLoginSuccess = {
-                    navController.navigate("menu-inicio") {
-                        popUpTo("login") { inclusive = true }
+                    navController.navigate(AppDestinations.Inicio.route) {
+                        popUpTo(AppDestinations.InicioSesion.route) { inclusive = true }
                     }
                 },
                 onNavigateToRegister = {
-                    navController.navigate("registro")
+                    navController.navigate(AppDestinations.Registro.route)
                 }
             )
         }
 
         // Pantalla de Registro
-        composable("registro") {
+        composable(AppDestinations.Registro.route) {
             RegisterScreen(
                 onRegisterSuccess = {
                     navController.popBackStack()
@@ -57,95 +55,65 @@ fun AppNavigation(
             )
         }
 
-        // Pantalla de Inicio
-        composable("menu-inicio") {
+        // Pantalla de Inicio (Agregadas todas las lambdas que requiere InicioScreen)
+        composable(AppDestinations.Inicio.route) {
             InicioScreen(
-                onNavigateToTab = { tab ->
-                    when (tab) {
-                        SerenaTab.INICIO -> {}
-                        SerenaTab.PERFIL -> { navController.navigate("perfil") }
-                        SerenaTab.DIARIO -> { navController.navigate("diario") }
-                        SerenaTab.CHAT -> { navController.navigate("chat") }
-                    }
+                onNavigateToChat = {
+                    navController.navigate(AppDestinations.Chat.route)
+                },
+                onNavigateToDiario = {
+                    navController.navigate(AppDestinations.Diario.route)
                 },
                 onNavigateToBotiquin = {
-                    navController.navigate("ejercicios") // Nueva ruta general
+                    navController.navigate(AppDestinations.Ejercicios.route)
                 }
             )
         }
 
         // Pantalla de Perfil
-        composable("perfil") {
+        composable(AppDestinations.Perfil.route) {
             PerfilScreen(
-                onNavigateToTab = { tab ->
-                    when (tab) {
-                        SerenaTab.INICIO -> {
-                            navController.navigate("menu-inicio")
-                        }
-                        SerenaTab.DIARIO -> {
-                            navController.navigate("diario")
-                        }
-                        SerenaTab.CHAT -> {
-                            navController.navigate("chat") // <-- DESCOMENTADO AQUÍ
-                        }
-                        SerenaTab.PERFIL -> {}
-                    }
-                },
                 onLogoutClick = {
-                    navController.navigate("login") {
-                        popUpTo("login") { inclusive = true }
+                    navController.navigate(AppDestinations.InicioSesion.route) {
+                        popUpTo(AppDestinations.InicioSesion.route) { inclusive = true }
                     }
                 }
             )
         }
 
         // Pantalla de Diario
-        composable("diario") {
+        composable(AppDestinations.Diario.route) {
             DiarioScreen(
-                onNavigateToTab = { tab ->
-                    when (tab) {
-                        SerenaTab.INICIO -> {
-                            navController.navigate("menu-inicio")
-                        }
-                        SerenaTab.DIARIO -> {}
-                        SerenaTab.CHAT -> {
-                            navController.navigate("chat") // <-- DESCOMENTADO AQUÍ
-                        }
-                        SerenaTab.PERFIL -> {
-                            navController.navigate("perfil")
-                        }
-                    }
-                },
                 onNewEntryClick = {
-                    navController.navigate("nuevo-diario")
+                    navController.navigate(AppDestinations.NuevoDiario.route)
                 },
                 onEntryClick = {
-                    navController.navigate("detalle-diario")
+                    navController.navigate(AppDestinations.DetalleDiario.route)
                 }
             )
         }
 
         // Pantalla de Detalle de Diario
-        composable("detalle-diario") {
+        composable(AppDestinations.DetalleDiario.route) {
             DetalleDiarioScreen(
                 onBackClick = {
                     navController.popBackStack()
                 },
                 onEditClick = {
-                    // Aquí irá la navegación a la pantalla de edición
+                    // Acción de edición
                 },
                 onDeleteClick = {
                     navController.popBackStack()
                 },
                 onShareClick = {
-                    // Lógica para abrir el menú de compartir
+                    // Acción de compartir
                 }
             )
         }
 
         // Pantalla de Chat
-        composable("chat") {
-            ChatScreen (
+        composable(AppDestinations.Chat.route) {
+            ChatScreen(
                 onBackClick = {
                     navController.popBackStack()
                 }
@@ -153,22 +121,24 @@ fun AppNavigation(
         }
 
         // Pantalla de Nuevo Diario
-        composable("nuevo-diario") {
+        composable(AppDestinations.NuevoDiario.route) {
             NuevoDiarioScreen(
                 onBackClick = {
                     navController.popBackStack()
                 },
                 onNotificationClick = {
-                    // notis
+                    // Notificaciones
                 },
                 onSaveClick = {
-                    navController.navigate("diario") { popUpTo("diario") { inclusive = true } }
+                    navController.navigate(AppDestinations.Diario.route) {
+                        popUpTo(AppDestinations.Diario.route) { inclusive = true }
+                    }
                 }
             )
         }
 
         // Pantalla de Respiración
-        composable("respiracion") {
+        composable(AppDestinations.ERespiracion.route) {
             RespiracionScreen(
                 onBackClick = {
                     navController.popBackStack()
@@ -177,19 +147,19 @@ fun AppNavigation(
         }
 
         // Menú principal del Botiquín Emocional
-        composable("ejercicios") {
+        composable(AppDestinations.Ejercicios.route) {
             EjerciciosScreen(
                 onBackClick = {
                     navController.popBackStack()
                 },
                 onNavigateToExercise = { rutaEjercicio ->
-                    // Navega a la ruta que le pasa la tarjeta ("respiracion", "aterrizaje", etc.)
                     navController.navigate(rutaEjercicio)
                 }
             )
         }
+
         // Pantalla de Aterrizaje 5-4-3-2-1
-        composable("aterrizaje") {
+        composable(AppDestinations.EAterrizaje.route) {
             AterrizajeScreen(
                 onBackClick = {
                     navController.popBackStack()
@@ -198,14 +168,14 @@ fun AppNavigation(
         }
 
         // Pantalla de Refuerzo Positivo
-        composable("afirmaciones") {
+        composable(AppDestinations.RefuerzoPositivo.route) {
             RefuerzoPositivoScreen(
                 onBackClick = { navController.popBackStack() }
             )
         }
 
         // Pantalla de Catarsis Simbólica
-        composable("liberacion") {
+        composable(AppDestinations.ECatarsis.route) {
             CatarsisScreen(
                 onBackClick = { navController.popBackStack() }
             )

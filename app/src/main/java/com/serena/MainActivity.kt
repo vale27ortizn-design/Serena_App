@@ -9,8 +9,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.serena.ui.components.SerenaBottomNavBar
+import com.serena.ui.navigation.AppDestinations
 import com.serena.ui.navigation.AppNavigation
 import com.serena.ui.screens.LoginScreen
 import com.serena.ui.theme.SerenaAppTheme
@@ -21,9 +26,30 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SerenaAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                val navController = rememberNavController()
+                val currentDestination by navController.currentBackStackEntryAsState()
+                val currentRoute = currentDestination?.destination?.route
+
+                // rutas donde el bottomNavBar no se ven
+                val hideBottomBarRoutes = listOf(
+                    AppDestinations.InicioSesion.route,
+                    AppDestinations.Registro.route,
+                    AppDestinations.Chat.route
+                )
+
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    bottomBar = {
+                        if (currentRoute !in hideBottomBarRoutes) {
+                            SerenaBottomNavBar(
+                                navController = navController
+                            )
+                        }
+                    }
+                ) { innerPadding ->
                     AppNavigation(
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(innerPadding),
+                        navController = navController
                     )
                 }
             }
@@ -50,7 +76,7 @@ fun GreetingPreview() {
 @Preview(showBackground = true)
 @Composable
 fun GreetingFullScreenPreview() {
-    SerenaAppTheme() {
+    SerenaAppTheme {
         LoginScreen(
             modifier = Modifier
                 .fillMaxSize(),

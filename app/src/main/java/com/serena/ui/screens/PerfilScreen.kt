@@ -22,7 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,36 +38,29 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.serena.R
-import com.serena.ui.components.SerenaBottomNavBar
-import com.serena.ui.components.SerenaTab
 import com.serena.ui.components.SerenaTopBar
 import com.serena.ui.theme.SerenaAppTheme
 
 @Composable
 fun PerfilScreen(
     modifier: Modifier = Modifier,
-    onNavigateToTab: (SerenaTab) -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
-    Scaffold(
-        topBar = {
-            SerenaTopBar(
-                title = "Perfil",
-                onNotificationClick = { /* notificaciones */ }
-            )
-        },
-        bottomBar = {
-            SerenaBottomNavBar(
-                currentTab = SerenaTab.PERFIL,
-                onTabSelected = { tab -> onNavigateToTab(tab) }
-            )
-        },
-        containerColor = colorResource(R.color.white)
-    ) { paddingValues ->
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.white))
+    ) {
+        // TopBar superior fija
+        SerenaTopBar(
+            title = "Perfil",
+            onNotificationClick = { /* notificaciones */ }
+        )
+
+        // Contenido con scroll vertical
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -338,7 +330,7 @@ fun PerfilScreen(
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(30.dp))
         }
     }
 }

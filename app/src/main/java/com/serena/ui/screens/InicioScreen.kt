@@ -2,6 +2,7 @@ package com.serena.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,40 +29,33 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.serena.R
-import com.serena.ui.components.SerenaBottomNavBar
-import com.serena.ui.components.SerenaTab
 import com.serena.ui.components.SerenaTopBar
-import com.serena.ui.theme.SerenaAppTheme
 
 @Composable
 fun InicioScreen(
     modifier: Modifier = Modifier,
-    onNavigateToTab: (SerenaTab) -> Unit = {},
-    onNavigateToBotiquin: () -> Unit = {}
+    onNavigateToBotiquin: () -> Unit,
+    onNavigateToChat: () -> Unit,
+    onNavigateToDiario: () -> Unit,
 ) {
-    Scaffold(
-        topBar = {
-            SerenaTopBar(
-                title = "Menú Principal",
-                onNotificationClick = { /* Acción notificaciones */ }
-            )
-        },
-        bottomBar = {
-            SerenaBottomNavBar(
-                currentTab = SerenaTab.INICIO,
-                onTabSelected = { tab -> onNavigateToTab(tab) }
-            )
-        },
-        containerColor = colorResource(R.color.white)
-    ) { paddingValues ->
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.white))
+    ) {
+        // TopBar fija superior
+        SerenaTopBar(
+            title = "Menú Principal",
+            onNotificationClick = { /* Acción notificaciones */ }
+        )
+
+        // Contenido con scroll vertical
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 8.dp)
         ) {
@@ -126,8 +119,11 @@ fun InicioScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Chips de emociones
+                    // Chips de emociones con SCROLL HORIZONTAL para evitar desborde
                     Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         EmotionChip(label = "En calma", iconRes = R.drawable.icon_hoja, isSelected = true)
@@ -146,7 +142,7 @@ fun InicioScreen(
                 iconRes = R.drawable.icon_maceta,
                 title = "Hablar con Serena",
                 description = "Tu asistente de apoyo emocional siempre disponible para escucharte y acompañarte.",
-                onClick = { onNavigateToTab(SerenaTab.CHAT) }
+                onClick = onNavigateToChat
             )
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -158,12 +154,12 @@ fun InicioScreen(
                 iconRes = R.drawable.icon_libro,
                 title = "Mi Diario Emocional",
                 description = "Registra tus pensamientos, desahoga tus cargas y reflexiona sobre tu crecimiento día a día.",
-                onClick = { onNavigateToTab(SerenaTab.DIARIO) }
+                onClick = onNavigateToDiario
             )
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Card 4: Botiquín Emocional (Nueva tarjeta general)
+            // Card 4: Botiquín Emocional
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -230,7 +226,7 @@ fun InicioScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
@@ -267,7 +263,7 @@ private fun EmotionChip(
     }
 }
 
-// Subcomponente: Tarjeta de Acción Grandes
+// Subcomponente: Tarjeta de Acción Grande
 @Composable
 private fun ActionCard(
     backgroundColor: Color,
@@ -331,13 +327,5 @@ private fun ActionCard(
                 lineHeight = 16.sp
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun InicioScreenPreview() {
-    SerenaAppTheme {
-        InicioScreen()
     }
 }

@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,145 +37,143 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.serena.R
-import com.serena.ui.components.SerenaBottomNavBar
-import com.serena.ui.components.SerenaTab
 import com.serena.ui.components.SerenaTopBar
 import com.serena.ui.theme.SerenaAppTheme
 
 @Composable
 fun DiarioScreen(
     modifier: Modifier = Modifier,
-    onNavigateToTab: (SerenaTab) -> Unit = {},
     onNewEntryClick: () -> Unit = {},
-    onEntryClick: () -> Unit = {} // <-- 1. Añadimos el parámetro aquí
+    onEntryClick: () -> Unit = {}
 ) {
-    Scaffold(
-        topBar = {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.white))
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // TopBar superior fija
             SerenaTopBar(
                 title = "Diario Emocional",
                 onNotificationClick = { /* Acción notificaciones */ }
             )
-        },
-        bottomBar = {
-            SerenaBottomNavBar(
-                currentTab = SerenaTab.DIARIO,
-                onTabSelected = { tab -> onNavigateToTab(tab) }
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNewEntryClick,
-                containerColor = colorResource(R.color.serena_fab_bg),
-                contentColor = colorResource(R.color.white),
-                shape = CircleShape
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.icon_mas),
-                    contentDescription = "Nueva entrada",
-                    modifier = Modifier.size(28.dp)
-                )
-            }
-        },
-        containerColor = colorResource(R.color.white)
-    ) { paddingValues ->
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 8.dp)
-        ) {
 
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Barra de Búsqueda Falsa
-            Surface(
+            // Contenido con scroll vertical
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .border(
-                        width = 1.dp,
-                        color = colorResource(R.color.serena_search_border),
-                        shape = RoundedCornerShape(50)
-                    )
-                    .clickable { /* Acción buscar */ },
-                color = colorResource(R.color.white),
-                shape = RoundedCornerShape(50)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp, vertical = 8.dp)
             ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Barra de Búsqueda Falsa
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(
+                            width = 1.dp,
+                            color = colorResource(R.color.serena_search_border),
+                            shape = RoundedCornerShape(50)
+                        )
+                        .clickable { /* Acción buscar */ },
+                    color = colorResource(R.color.white),
+                    shape = RoundedCornerShape(50)
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.icon_lupa),
-                        contentDescription = "Buscar",
-                        tint = colorResource(R.color.serena_text_gray),
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Buscar...",
-                        fontSize = 13.sp,
-                        color = colorResource(R.color.serena_text_gray)
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.icon_lupa),
+                            contentDescription = "Buscar",
+                            tint = colorResource(R.color.serena_text_gray),
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Buscar...",
+                            fontSize = 13.sp,
+                            color = colorResource(R.color.serena_text_gray)
+                        )
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Chips de Filtro con Scroll Horizontal
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChipItem(label = "Todos", iconRes = null, isSelected = true)
+                    FilterChipItem(label = "Tranquila", iconRes = R.drawable.icon_paztranquilidad, isSelected = false)
+                    FilterChipItem(label = "Con esperanza", iconRes = R.drawable.icon_solnube, isSelected = false)
+                    FilterChipItem(label = "Abrumada", iconRes = R.drawable.icon_nubellorando, isSelected = false)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Tarjeta de Reflexión del Día
+                ReflexionDelDiaCard()
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Lista de Entradas del Diario
+                JournalEntryCard(
+                    fecha = "Hoy, 29 Septiembre",
+                    emocion = "Tranquila",
+                    emocionIconRes = R.drawable.icon_paztranquilidad,
+                    contenido = "Hoy me tomé 10 minutos para caminar bajo el sol y sentí mucha paz mental. Dejar el...",
+                    hora = "16:45 hs",
+                    onClick = onEntryClick
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                JournalEntryCard(
+                    fecha = "Ayer, 28 de Septiembre",
+                    emocion = "Con esperanza",
+                    emocionIconRes = R.drawable.icon_solnube,
+                    contenido = "Logré terminar mi proyecto a tiempo. Aunque hubo tensión, pude respirar profundo y con...",
+                    hora = "20:15 hs",
+                    onClick = onEntryClick
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                JournalEntryCard(
+                    fecha = "Jueves, 24 de Septiembre",
+                    emocion = "Algo abrumada",
+                    emocionIconRes = R.drawable.icon_nubellorando,
+                    contenido = "Hoy es un día con muchas tareas pendientes. Serena me sugirió priorizar y me ayudó a...",
+                    hora = "11:30 hs",
+                    onClick = onEntryClick
+                )
+
+                Spacer(modifier = Modifier.height(80.dp))
             }
+        }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Chips de Filtro
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilterChipItem(label = "Todos", iconRes = null, isSelected = true)
-                FilterChipItem(label = "Tranquila", iconRes = R.drawable.icon_paztranquilidad, isSelected = false)
-                FilterChipItem(label = "Con esperanza", iconRes = R.drawable.icon_solnube, isSelected = false)
-                FilterChipItem(label = "Abrumada", iconRes = R.drawable.icon_nubellorando, isSelected = false)
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Tarjeta de Reflexión del Día
-            ReflexionDelDiaCard()
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Lista de Entradas del Diario
-            // 2. Pasamos el evento onClick a cada tarjeta
-            JournalEntryCard(
-                fecha = "Hoy, 29 Septiembre",
-                emocion = "Tranquila",
-                emocionIconRes = R.drawable.icon_paztranquilidad,
-                contenido = "Hoy me tomé 10 minutos para caminar bajo el sol y sentí mucha paz mental. Dejar el...",
-                hora = "16:45 hs",
-                onClick = onEntryClick
+        // Botón Flotante para crear entrada (Alineado en la esquina inferior derecha)
+        FloatingActionButton(
+            onClick = onNewEntryClick,
+            containerColor = colorResource(R.color.serena_fab_bg),
+            contentColor = colorResource(R.color.white),
+            shape = CircleShape,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 20.dp, end = 20.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.icon_mas),
+                contentDescription = "Nueva entrada",
+                modifier = Modifier.size(28.dp)
             )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            JournalEntryCard(
-                fecha = "Ayer, 28 de Septiembre",
-                emocion = "Con esperanza",
-                emocionIconRes = R.drawable.icon_solnube,
-                contenido = "Logré terminar mi proyecto a tiempo. Aunque hubo tensión, pude respirar profundo y con...",
-                hora = "20:15 hs",
-                onClick = onEntryClick
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            JournalEntryCard(
-                fecha = "Jueves, 24 de Septiembre",
-                emocion = "Algo abrumada",
-                emocionIconRes = R.drawable.icon_nubellorando,
-                contenido = "Hoy es un día con muchas tareas pendientes. Serena me sugirió priorizar y me ayudó a...",
-                hora = "11:30 hs",
-                onClick = onEntryClick
-            )
-
-            Spacer(modifier = Modifier.height(80.dp))
         }
     }
 }
@@ -274,12 +271,12 @@ private fun JournalEntryCard(
     emocionIconRes: Int,
     contenido: String,
     hora: String,
-    onClick: () -> Unit = {} // <-- 3. Añadimos el parámetro al subcomponente
+    onClick: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }, // <-- 4. Hacemos toda la tarjeta clickeable
+            .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         color = colorResource(R.color.serena_card_entry_bg)
     ) {
@@ -363,7 +360,7 @@ private fun JournalEntryCard(
                         .size(28.dp)
                         .clip(CircleShape)
                         .background(colorResource(R.color.white))
-                        .clickable { onClick() }, // <-- 5. También agregamos el clic aquí por si el usuario toca la flecha
+                        .clickable { onClick() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
