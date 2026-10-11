@@ -121,9 +121,16 @@ fun CatarsisScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp),
-                    placeholder = { Text("Escribe libremente...") },
+                    placeholder = {
+                        Text(
+                            text = "Escribe libremente...",
+                            color = colorResource(id = R.color.serena_text_gray)
+                        )
+                    },
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = colorResource(id = R.color.serena_text_dark),
+                        unfocusedTextColor = colorResource(id = R.color.serena_text_dark),
                         focusedContainerColor = colorResource(id = R.color.white),
                         unfocusedContainerColor = colorResource(id = R.color.white),
                         focusedBorderColor = colorResource(id = R.color.serena_green_primary),
