@@ -316,6 +316,7 @@ fun LoginScreen(
                     if (usuario != null) {
                         //sesion
                         sessionManager.saveSession(usuario.id, usuario.nombre, usuario.correo)
+                        db.registrarActividad(usuario.id)
                         onLoginSuccess()
                     } else {
                         Toast.makeText(context, "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show()

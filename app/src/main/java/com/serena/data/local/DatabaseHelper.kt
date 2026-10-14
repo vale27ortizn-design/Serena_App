@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Base64
 import java.security.MessageDigest
 import java.security.SecureRandom
+import java.util.TimeZone
 
 data class Usuario(
     val id: Int,
@@ -39,13 +40,22 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
             )
         """.trimIndent())
 
-    }
+        db.execSQL("""
+            CREATE TABLE actividad (
+                usuario_id INTEGER NOT NULL,
+                dia INTEGER NOT NULL,
+                PRIMARY KEY (usuario_id, dia),
+                FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+            )
+        """.trimIndent())
 
-    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS listas")
+    } override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        db.execSQL("DROP TABLE IF EXISTS actividad")
+
         db.execSQL("DROP TABLE IF EXISTS usuarios")
         onCreate(db)
     }
+
 
     // ---------------- REGISTER ----------------
 
@@ -98,6 +108,57 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
         }
     }
 
+    // Número de día local (evita que el día cambie a las 7 pm por UTC en Perú)
+    private fun diaActual(): Long {
+        val ahora = System.currentTimeMillis()
+        return (ahora + TimeZone.getDefault().getOffset(ahora)) / 86_400_000L
+    }
+
+    // Marca el día de hoy como "usó la app". Si ya existe, lo ignora
+    fun registrarActividad(usuarioId: Int) {
+        if (usuarioId <= 0 || !existeUsuario(usuarioId)) return
+        try {
+            val values = ContentValues().apply {
+                put("usuario_id", usuarioId)
+                put("dia", diaActual())
+            }
+            writableDatabase.insertWithOnConflict(
+                "actividad", null, values, SQLiteDatabase.CONFLICT_IGNORE
+            )
+        } catch (e: Exception) {
+            android.util.Log.e("DatabaseHelper", "Error registrando actividad", e)
+        }
+    }
+
+    //Días consecutivos hasta hoy
+    fun calcularRacha(usuarioId: Int): Int {
+        val dias = mutableListOf<Long>()
+        readableDatabase.rawQuery(
+            "SELECT dia FROM actividad WHERE usuario_id = ? ORDER BY dia DESC",
+            arrayOf(usuarioId.toString())
+        ).use { c ->
+            while (c.moveToNext()) dias.add(c.getLong(0))
+        }
+
+        if (dias.isEmpty()) return 0
+
+        val hoy = diaActual()
+        if (dias[0] != hoy && dias[0] != hoy - 1) return 0   // racha rota
+
+        var racha = 1
+        for (i in 1 until dias.size) {
+            if (dias[i - 1] - dias[i] == 1L) racha++ else break
+        }
+        return racha
+    }
+
+    fun existeUsuario(id: Int): Boolean {
+        readableDatabase.rawQuery(
+            "SELECT 1 FROM usuarios WHERE id = ?",
+            arrayOf(id.toString())
+        ).use { return it.moveToFirst() }
+    }
+
     // ---------------- SEGURIDAD ----------------
 
     //Las bases de datos de las aplicaciones (incluyendo este archivo de SQLite
@@ -115,9 +176,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
             .digest((salt + clave).toByteArray(Charsets.UTF_8))
         return Base64.encodeToString(digest, Base64.NO_WRAP)
     }
-
     companion object {
         private const val DATABASE_NAME = "serena_app.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 3   // antes: 2
     }
 }

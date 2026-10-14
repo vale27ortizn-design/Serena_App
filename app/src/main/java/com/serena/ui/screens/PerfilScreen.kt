@@ -75,6 +75,9 @@ fun PerfilScreen(
             .format(Date(it.fechaRegistro))
             .replaceFirstChar { c -> c.uppercase() }
     } ?: "Septiembre 2026"
+    val racha = remember {
+        if (usuario != null && db != null) db.calcularRacha(usuario.id) else 14  // 14 solo para el Preview
+    }
 
 
     Column(
@@ -188,7 +191,7 @@ fun PerfilScreen(
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column {
                                     Text(
-                                        text = "14 días consecutivos",
+                                        text = if (racha == 1) "1 día consecutivo" else "$racha días consecutivos",
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = colorResource(R.color.serena_text_dark)

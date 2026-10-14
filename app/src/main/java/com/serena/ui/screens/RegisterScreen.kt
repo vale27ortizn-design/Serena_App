@@ -359,6 +359,7 @@ fun RegisterScreen(
                         val id = db.registrarUsuario(nombres, email, clave)
                         if (id > 0) {
                             sessionManager.saveSession(id.toInt(), nombres.trim(), email.trim().lowercase())
+                            db.registrarActividad(id.toInt())
                             onRegisterSuccess()
                         } else {
                             Toast.makeText(context, "No se pudo registrar", Toast.LENGTH_SHORT).show()

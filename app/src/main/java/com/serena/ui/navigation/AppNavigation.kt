@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.serena.data.preferences.SessionManager
 import com.serena.ui.screens.*
+import com.serena.data.local.DatabaseHelper
 
 @Composable
 fun AppNavigation(
@@ -18,16 +19,22 @@ fun AppNavigation(
     val context = LocalContext.current
     val sessionManager = remember { SessionManager(context) }
 
+    val sesionValida = remember {
+        val valida = sessionManager.isLogged() &&
+                DatabaseHelper(context).existeUsuario(sessionManager.getUserId())
+        if (!valida) sessionManager.clearSession()   // limpia sesión
+        valida
+    }
+
     NavHost(
         navController = navController,
-        startDestination = if (sessionManager.isLogged()) {
+        startDestination = if (sesionValida) {
             AppDestinations.Inicio.route
         } else {
             AppDestinations.InicioSesion.route
         },
         modifier = modifier,
-    ) {
-        // Pantalla de Login
+    ) {  // Pantalla de Login
         composable(AppDestinations.InicioSesion.route) {
             LoginScreen(
                 onLoginSuccess = {

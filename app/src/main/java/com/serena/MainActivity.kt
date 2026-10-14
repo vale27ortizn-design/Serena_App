@@ -24,8 +24,19 @@ import com.serena.ui.components.SerenaBottomNavBar
 import com.serena.ui.navigation.AppDestinations
 import com.serena.ui.navigation.AppNavigation
 import com.serena.ui.theme.SerenaAppTheme
+import com.serena.data.local.DatabaseHelper
+import com.serena.data.preferences.SessionManager
+
 
 class MainActivity : ComponentActivity() {
+
+    override fun onStart() {
+        super.onStart()
+        val session = SessionManager(this)
+        if (session.isLogged()) {
+            DatabaseHelper(this).registrarActividad(session.getUserId())
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
