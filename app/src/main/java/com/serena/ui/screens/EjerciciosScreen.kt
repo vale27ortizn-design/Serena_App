@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,44 +41,46 @@ fun EjerciciosScreen(
     onBackClick: () -> Unit = {},
     onNavigateToExercise: (String) -> Unit = {}
 ) {
-    Scaffold(
-        containerColor = colorResource(id = R.color.white),
-        topBar = {
-            Row(
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(colorResource(id = R.color.white))
+    ) {
+        // barra superior con boton volver
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(colorResource(id = R.color.serena_card_sintonia_bg))
+                    .clickable { onBackClick() },
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(colorResource(id = R.color.serena_card_sintonia_bg))
-                        .clickable { onBackClick() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.icon_flechaizquierda),
-                        contentDescription = "Volver",
-                        tint = colorResource(id = R.color.serena_green_dark),
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(14.dp))
-                Text(
-                    text = "Botiquín Emocional",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colorResource(id = R.color.serena_text_dark)
+                Icon(
+                    painter = painterResource(id = R.drawable.icon_flechaizquierda),
+                    contentDescription = "Volver",
+                    tint = colorResource(id = R.color.serena_green_dark),
+                    modifier = Modifier.size(18.dp)
                 )
             }
+            Spacer(modifier = Modifier.width(14.dp))
+            Text(
+                text = "Botiquín Emocional",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = colorResource(id = R.color.serena_text_dark)
+            )
         }
-    ) { paddingValues ->
+
+        // conenido del botiquiwn y tecnicas
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp),
         ) {
@@ -145,12 +146,12 @@ fun EjerciciosScreen(
                 onClick = { onNavigateToExercise(AppDestinations.ECatarsis.route) }
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(30.dp))
         }
     }
 }
 
-// Componente reutilizable para cada tarjeta de ejercicio
+// reutilizable para cada tarjeta de ejercicio
 @Composable
 private fun EjercicioCard(
     title: String,
