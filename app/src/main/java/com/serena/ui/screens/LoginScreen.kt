@@ -53,10 +53,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.serena.R
 import com.serena.ui.theme.SerenaAppTheme
+import androidx.compose.ui.text.font.FontFamily
+import com.serena.ui.theme.NunitoSans
 
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
+
+    fontFamily: FontFamily = NunitoSans,
     onLoginSuccess: () -> Unit = {},
     onNavigateToRegister: () -> Unit = {}
 ) {
@@ -334,6 +338,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
+
         // Enlace hacia Registro (Buenas prácticas: Componente TextButton oficial)
         TextButton(
             onClick = { onNavigateToRegister() },
@@ -353,7 +358,7 @@ fun LoginScreen(
                         append("Regístrate aquí")
                     }
                 },
-                fontSize = 11.sp
+                fontSize = 10.sp,
             )
         }
     }

@@ -110,7 +110,7 @@ fun InicioScreen(
                         ) {
                             Text(
                                 text = "Actualizado hace 2h",
-                                fontSize = 10.sp,
+                                fontSize = 9.sp,
                                 color = colorResource(R.color.serena_text_gray),
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                             )
@@ -226,7 +226,7 @@ fun InicioScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

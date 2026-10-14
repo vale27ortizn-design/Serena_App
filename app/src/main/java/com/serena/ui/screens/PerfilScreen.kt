@@ -40,10 +40,14 @@ import androidx.compose.ui.unit.sp
 import com.serena.R
 import com.serena.ui.components.SerenaTopBar
 import com.serena.ui.theme.SerenaAppTheme
+import androidx.compose.ui.text.font.FontFamily
+import com.serena.ui.theme.NunitoSans
 
 @Composable
 fun PerfilScreen(
     modifier: Modifier = Modifier,
+
+    fontFamily: FontFamily = NunitoSans,
     onLogoutClick: () -> Unit = {}
 ) {
     Column(
@@ -330,7 +334,7 @@ fun PerfilScreen(
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

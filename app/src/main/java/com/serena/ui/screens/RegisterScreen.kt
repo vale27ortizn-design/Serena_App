@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -48,10 +49,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.serena.R
 import com.serena.ui.theme.SerenaAppTheme
+import androidx.compose.ui.text.font.FontFamily
+import com.serena.ui.theme.NunitoSans
 
 @Composable
 fun RegisterScreen(
     modifier: Modifier = Modifier,
+    fontFamily: FontFamily = NunitoSans,
     onRegisterSuccess: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {}
 ) {
@@ -366,25 +370,27 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Redirección a Login
-        Text(
-            text = buildAnnotatedString {
-                withStyle(SpanStyle(color = colorResource(R.color.serena_text_gray))) {
-                    append("¿Ya tienes una cuenta? ")
-                }
-                withStyle(
-                    SpanStyle(
-                        color = colorResource(R.color.serena_green_dark),
-                        fontWeight = FontWeight.Bold
-                    )
-                ) {
-                    append("Inicia sesión")
-                }
-            },
-            modifier = Modifier
-                .clickable { onNavigateToLogin() }
-                .padding(bottom = 8.dp),
-            fontSize = 12.sp
-        )
+        TextButton(
+            onClick = {  onNavigateToLogin() },
+            modifier = Modifier.padding(bottom = 8.dp)
+        ) {
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(SpanStyle(color = colorResource(R.color.serena_text_gray))) {
+                        append("¿Ya tienes una cuenta? ")
+                    }
+                    withStyle(
+                        SpanStyle(
+                            color = colorResource(R.color.serena_green_dark),
+                            fontWeight = FontWeight.Bold
+                        )
+                    ) {
+                        append("Inicia sesión")
+                    }
+                },
+                fontSize = 10.sp
+            )
+        }
     }
 }
 

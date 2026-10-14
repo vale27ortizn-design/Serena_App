@@ -146,7 +146,7 @@ fun EjerciciosScreen(
                 onClick = { onNavigateToExercise(AppDestinations.ECatarsis.route) }
             )
 
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
