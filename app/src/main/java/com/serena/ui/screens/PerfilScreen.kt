@@ -42,14 +42,41 @@ import com.serena.ui.components.SerenaTopBar
 import com.serena.ui.theme.SerenaAppTheme
 import androidx.compose.ui.text.font.FontFamily
 import com.serena.ui.theme.NunitoSans
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
+import com.serena.data.local.DatabaseHelper
+import com.serena.data.preferences.SessionManager
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun PerfilScreen(
     modifier: Modifier = Modifier,
-
     fontFamily: FontFamily = NunitoSans,
     onLogoutClick: () -> Unit = {}
 ) {
+
+    val context = LocalContext.current
+    val isPreview = LocalInspectionMode.current   // evita crash de SQLite en preview
+
+    val sessionManager = remember { if (isPreview) null else SessionManager(context) }
+    val db = remember { if (isPreview) null else DatabaseHelper(context) }
+
+    val usuario = remember {
+        sessionManager?.let { db?.obtenerUsuario(it.getUserId()) }
+    }
+
+    val nombre = usuario?.nombre ?: sessionManager?.getUserName() ?: "Fernanda Navarro"
+    val correo = usuario?.correo ?: sessionManager?.getUserEmail() ?: "fer.navo@email.com"
+    val miembroDesde = usuario?.let {
+        SimpleDateFormat("MMMM yyyy", Locale("es", "PE"))
+            .format(Date(it.fechaRegistro))
+            .replaceFirstChar { c -> c.uppercase() }
+    } ?: "Septiembre 2026"
+
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -116,14 +143,14 @@ fun PerfilScreen(
                         // Nombre y Miembro desde
                         Column {
                             Text(
-                                text = "Fernanda Navarro",
+                                text = nombre,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colorResource(R.color.serena_text_dark)
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Miembro desde Septiembre 2026",
+                                text = "Miembro desde $miembroDesde",
                                 fontSize = 12.sp,
                                 color = colorResource(R.color.serena_text_gray)
                             )
@@ -226,8 +253,8 @@ fun PerfilScreen(
                 Column(modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp)) {
                     // Nombre Completo
                     DatoPersonalItem(
-                        label = "Nombre completo",
-                        value = "Fernanda Navarro"
+                        label = "Nombre Agregado",
+                        value = nombre
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -235,7 +262,7 @@ fun PerfilScreen(
                     // Correo Electrónico
                     DatoPersonalItem(
                         label = "Correo electrónico",
-                        value = "fer.navo@email.com"
+                        value = correo
                     )
                 }
             }
@@ -254,12 +281,6 @@ fun PerfilScreen(
             Spacer(modifier = Modifier.height(10.dp))
 
             // Opciones de Seguridad y Bienestar
-            OpcionAjusteItem(
-                iconRes = R.drawable.icon_cambiarcontra,
-                titulo = "Cambiar contraseña",
-                subtitulo = "Actualizada hace 2 meses",
-                onClick = { }
-            )
             Spacer(modifier = Modifier.height(8.dp))
             OpcionAjusteItem(
                 iconRes = R.drawable.icon_noticalma,
@@ -279,7 +300,10 @@ fun PerfilScreen(
 
             // Botón: Cerrar Sesión
             OutlinedButton(
-                onClick = onLogoutClick,
+                onClick = {
+                    sessionManager?.clearSession()
+                    onLogoutClick()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(46.dp),
@@ -321,7 +345,7 @@ fun PerfilScreen(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "Serena v1.1.0 • Hecho con cariño para tu tranquilidad",
+                    text = "Serena v1.2.0 • Hecho con cariño para tu paz",
                     fontSize = 10.sp,
                     color = colorResource(R.color.serena_text_gray)
                 )
@@ -431,13 +455,6 @@ private fun OpcionAjusteItem(
             }
         }
 
-        // Flecha a la derecha
-        Icon(
-            painter = painterResource(id = R.drawable.icon_flechalogin),
-            contentDescription = "Siguiente",
-            tint = colorResource(R.color.serena_text_gray),
-            modifier = Modifier.size(14.dp)
-        )
     }
 }
 

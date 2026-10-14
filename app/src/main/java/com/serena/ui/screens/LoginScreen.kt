@@ -55,15 +55,23 @@ import com.serena.R
 import com.serena.ui.theme.SerenaAppTheme
 import androidx.compose.ui.text.font.FontFamily
 import com.serena.ui.theme.NunitoSans
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import com.serena.data.local.DatabaseHelper
+import com.serena.data.preferences.SessionManager
 
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-
     fontFamily: FontFamily = NunitoSans,
     onLoginSuccess: () -> Unit = {},
     onNavigateToRegister: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val db = remember { DatabaseHelper(context) }
+    val sessionManager = remember { SessionManager(context) }
+
+
     var email by remember { mutableStateOf("") }
     var clave by remember { mutableStateOf("") }
     var claveVisible by remember { mutableStateOf(false) }
@@ -291,7 +299,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón Iniciar Sesión (Este estaba bien, mantiene su validación y estructura)
+        // Botón Iniciar Sesión
         Button(
             onClick = {
                 val isValidEmail = email.isNotBlank() && email.contains("@")
@@ -304,7 +312,14 @@ fun LoginScreen(
                 errorClave = !isValidClave
 
                 if (isValidEmail && isValidClave) {
-                    onLoginSuccess()
+                    val usuario = db.login(email, clave)
+                    if (usuario != null) {
+                        //sesion
+                        sessionManager.saveSession(usuario.id, usuario.nombre, usuario.correo)
+                        onLoginSuccess()
+                    } else {
+                        Toast.makeText(context, "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show()
+                    }
                 }
             },
             modifier = Modifier

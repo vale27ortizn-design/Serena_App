@@ -22,6 +22,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +37,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.serena.R
 import com.serena.ui.components.SerenaTopBar
+import com.serena.data.local.DatabaseHelper
+import com.serena.data.preferences.SessionManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 
 @Composable
 fun InicioScreen(
@@ -41,6 +49,22 @@ fun InicioScreen(
     onNavigateToChat: () -> Unit,
     onNavigateToDiario: () -> Unit,
 ) {
+    val context = LocalContext.current
+    val isPreview = LocalInspectionMode.current
+
+    val sessionManager = remember { if (isPreview) null else SessionManager(context) }
+    val db = remember { if (isPreview) null else DatabaseHelper(context) }
+
+    val usuario = remember {
+        sessionManager?.let { db?.obtenerUsuario(it.getUserId()) }
+    }
+
+    val nombre = usuario?.nombre ?: sessionManager?.getUserName() ?: "Fernanda Navarro"
+
+    // Estados para la sintonía de hoy
+    var selectedEmotion by remember { mutableStateOf("En calma") }
+    var updateText by remember { mutableStateOf("Actualizado hace 2h") }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -61,7 +85,7 @@ fun InicioScreen(
         ) {
             // Saludo inicial
             Text(
-                text = "Hola, Fernanda",
+                text = "Hola, $nombre",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = colorResource(R.color.serena_text_dark)
@@ -88,47 +112,59 @@ fun InicioScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.icon_cartitainterrogacion),
-                                contentDescription = null,
-                                tint = colorResource(R.color.serena_green_dark),
-                                modifier = Modifier.size(16.dp)
-                            )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = "Tu sintonía de hoy",
-                                fontSize = 13.sp,
+                                fontSize = 11.sp, // Letra más compacta
                                 fontWeight = FontWeight.Bold,
                                 color = colorResource(R.color.serena_text_dark)
                             )
                         }
 
-                        // Badge "Actualizado hace 2h"
+                        // Badge dinámico más compacto
                         Surface(
                             shape = RoundedCornerShape(50),
                             color = colorResource(R.color.serena_badge_bg)
                         ) {
                             Text(
-                                text = "Actualizado hace 2h",
-                                fontSize = 9.sp,
+                                text = updateText,
+                                fontSize = 8.sp, // Letra más pequeña para el badge
                                 color = colorResource(R.color.serena_text_gray),
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Chips de emociones con SCROLL HORIZONTAL para evitar desborde
+                    // Chips de emociones ampliados con SCROLL HORIZONTAL
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        EmotionChip(label = "En calma", iconRes = R.drawable.icon_hoja, isSelected = true)
-                        EmotionChip(label = "Agradecida", iconRes = R.drawable.text_estrellitas, isSelected = false)
-                        EmotionChip(label = "Cansada", iconRes = R.drawable.icon_nubecita, isSelected = false)
+                        val emotions = listOf(
+                            Triple("En calma", R.drawable.icon_hoja, "Actualizado hace un momento"),
+                            Triple("Agradecida", R.drawable.text_estrellitas, "Actualizado hace un momento"),
+                            Triple("Cansada", R.drawable.icon_nubecita, "Actualizado hace un momento"),
+                            Triple("Ansiosa", R.drawable.icon_cartitainterrogacion, "Actualizado hace un momento"),
+                            Triple("Esperanzada", R.drawable.icon_corazon, "Actualizado hace un momento"),
+                            Triple("Reflexiva", R.drawable.icon_libro, "Actualizado hace un momento"),
+                            Triple("Estresada", R.drawable.icon_fuego, "Actualizado hace un momento")
+                        )
+
+                        emotions.forEach { (label, iconRes, timeText) ->
+                            EmotionChip(
+                                label = label,
+                                iconRes = iconRes,
+                                isSelected = selectedEmotion == label,
+                                onClick = {
+                                    selectedEmotion = label
+                                    updateText = timeText
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -231,35 +267,40 @@ fun InicioScreen(
     }
 }
 
-// Subcomponente: Chip de Emoción
+/// Subcomponente: Chip de Emoción
 @Composable
 private fun EmotionChip(
     label: String,
     iconRes: Int,
-    isSelected: Boolean
+    isSelected: Boolean,
+    onClick: () -> Unit
 ) {
-    Surface(
-        shape = RoundedCornerShape(50),
-        color = if (isSelected) colorResource(R.color.serena_chip_selected_bg) else colorResource(R.color.white)
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(
+                color = if (isSelected)
+                    colorResource(R.color.serena_chip_selected_bg)
+                else
+                    colorResource(R.color.white)
+            )
+            .clickable { onClick() }
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(id = iconRes),
-                contentDescription = label,
-                tint = colorResource(R.color.serena_green_dark),
-                modifier = Modifier.size(12.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = label,
-                fontSize = 11.sp,
-                fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
-                color = colorResource(R.color.serena_text_dark)
-            )
-        }
+        Icon(
+            painter = painterResource(id = iconRes),
+            contentDescription = label,
+            tint = colorResource(R.color.serena_green_dark),
+            modifier = Modifier.size(12.dp)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = label,
+            fontSize = 11.sp,
+            fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
+            color = colorResource(R.color.serena_text_dark)
+        )
     }
 }
 

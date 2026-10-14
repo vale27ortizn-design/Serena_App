@@ -51,6 +51,10 @@ import com.serena.R
 import com.serena.ui.theme.SerenaAppTheme
 import androidx.compose.ui.text.font.FontFamily
 import com.serena.ui.theme.NunitoSans
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import com.serena.data.local.DatabaseHelper
+import com.serena.data.preferences.SessionManager
 
 @Composable
 fun RegisterScreen(
@@ -59,6 +63,11 @@ fun RegisterScreen(
     onRegisterSuccess: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {}
 ) {
+    // guardar la sesion
+    val context = LocalContext.current
+    val db = remember { DatabaseHelper(context) }
+    val sessionManager = remember { SessionManager(context) }
+
     // Estados para los valores de los campos
     var nombres by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -69,6 +78,7 @@ fun RegisterScreen(
     var errorNombres by remember { mutableStateOf(false) }
     var errorEmail by remember { mutableStateOf(false) }
     var errorClave by remember { mutableStateOf(false) }
+    var errorCorreoExiste by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -132,7 +142,7 @@ fun RegisterScreen(
         // Campo: Nombres
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = "Nombres",
+                text = "Nombre o Apodo",
                 color = colorResource(R.color.serena_text_dark),
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Medium,
@@ -200,8 +210,10 @@ fun RegisterScreen(
                 value = email,
                 onValueChange = {
                     email = it
+                    errorCorreoExiste = false
                     if (email.isNotBlank()) errorEmail = false
                 },
+
                 placeholder = {
                     Text(
                         text = "ejemplo@correo.com",
@@ -219,7 +231,7 @@ fun RegisterScreen(
                 },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                isError = errorEmail,
+                isError = errorEmail || errorCorreoExiste,
                 shape = RoundedCornerShape(50),
                 colors = TextFieldDefaults.colors(
                     focusedTextColor = colorResource(R.color.serena_text_dark),
@@ -233,9 +245,13 @@ fun RegisterScreen(
                 ),
                 modifier = Modifier.fillMaxWidth(),
                 supportingText = {
-                    if (errorEmail) {
+                    if (errorEmail || errorCorreoExiste) {
                         Text(
-                            text = if (email.isEmpty()) "El correo es obligatorio" else "Ingrese un correo válido",
+                            text = when {
+                                errorCorreoExiste -> "Este correo ya está registrado"
+                                email.isEmpty() -> "El correo es obligatorio"
+                                else -> "Ingrese un correo válido"
+                            },
                             color = Color.Red,
                             fontSize = 10.sp
                         )
@@ -336,9 +352,18 @@ fun RegisterScreen(
                 errorEmail = !isValidEmail
                 errorClave = !isValidClave
 
-                // Solo si todo es válido, navega o ejecuta el registro
                 if (isValidNombres && isValidEmail && isValidClave) {
-                    onRegisterSuccess()
+                    if (db.existeCorreo(email)) {
+                        errorCorreoExiste = true
+                    } else {
+                        val id = db.registrarUsuario(nombres, email, clave)
+                        if (id > 0) {
+                            sessionManager.saveSession(id.toInt(), nombres.trim(), email.trim().lowercase())
+                            onRegisterSuccess()
+                        } else {
+                            Toast.makeText(context, "No se pudo registrar", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
             },
             modifier = Modifier

@@ -48,7 +48,6 @@ class MainActivity : ComponentActivity() {
                     AppDestinations.Chat.route
                 )
 
-                // barras de navehagcion del sistema afuera de la app
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -60,11 +59,12 @@ class MainActivity : ComponentActivity() {
                         containerColor = colorResource(R.color.white),
                         contentWindowInsets = WindowInsets(0.dp),
                         bottomBar = {
-                            if (currentRoute !in hideBottomBarRoutes) {
+                            if (currentRoute != null && currentRoute !in hideBottomBarRoutes) {
                                 SerenaBottomNavBar(navController = navController)
                             }
                         }
                     ) { innerPadding ->
+                        // Ya no requiere pasar parámetros extra, AppNavigation maneja todo internamente
                         AppNavigation(
                             modifier = Modifier.padding(innerPadding),
                             navController = navController
