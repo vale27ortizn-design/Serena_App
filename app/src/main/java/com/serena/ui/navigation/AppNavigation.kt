@@ -5,8 +5,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.serena.data.preferences.SessionManager
 import com.serena.ui.screens.*
 import com.serena.data.local.DatabaseHelper
@@ -22,19 +24,16 @@ fun AppNavigation(
     val sesionValida = remember {
         val valida = sessionManager.isLogged() &&
                 DatabaseHelper(context).existeUsuario(sessionManager.getUserId())
-        if (!valida) sessionManager.clearSession()   // limpia sesión
+        if (!valida) sessionManager.clearSession()
         valida
     }
 
     NavHost(
         navController = navController,
-        startDestination = if (sesionValida) {
-            AppDestinations.Inicio.route
-        } else {
-            AppDestinations.InicioSesion.route
-        },
+        startDestination = if (sesionValida) AppDestinations.Inicio.route else AppDestinations.InicioSesion.route,
         modifier = modifier,
-    ) {  // Pantalla de Login
+    ) {
+        // Pantalla de Login
         composable(AppDestinations.InicioSesion.route) {
             LoginScreen(
                 onLoginSuccess = {
@@ -59,15 +58,9 @@ fun AppNavigation(
         // Pantalla de Inicio
         composable(AppDestinations.Inicio.route) {
             InicioScreen(
-                onNavigateToChat = {
-                    navController.navigate(AppDestinations.Chat.route)
-                },
-                onNavigateToDiario = {
-                    navController.navigate(AppDestinations.Diario.route)
-                },
-                onNavigateToBotiquin = {
-                    navController.navigate(AppDestinations.Ejercicios.route)
-                }
+                onNavigateToChat = { navController.navigate(AppDestinations.Chat.route) },
+                onNavigateToDiario = { navController.navigate(AppDestinations.Diario.route) },
+                onNavigateToBotiquin = { navController.navigate(AppDestinations.Ejercicios.route) }
             )
         }
 
@@ -82,22 +75,29 @@ fun AppNavigation(
             )
         }
 
-        // Pantalla de Diario
+        // Pantalla de Diario (Muestra la lista)
         composable(AppDestinations.Diario.route) {
             DiarioScreen(
                 onNewEntryClick = {
                     navController.navigate(AppDestinations.NuevoDiario.route)
                 },
-                onEntryClick = {
-                    navController.navigate(AppDestinations.DetalleDiario.route)
+                onEntryClick = { diarioId ->
+                    // Viaja al detalle pasando el ID exacto
+                    navController.navigate("${AppDestinations.DetalleDiario.route}/$diarioId")
                 }
             )
         }
 
-        // Pantalla de Detalle de Diario
-        composable(AppDestinations.DetalleDiario.route) {
+        // Pantalla de Detalle de Diario (Lee una nota específica)
+        composable(
+            route = "${AppDestinations.DetalleDiario.route}/{diarioId}",
+            arguments = listOf(navArgument("diarioId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val diarioId = backStackEntry.arguments?.getInt("diarioId") ?: -1
             DetalleDiarioScreen(
-                onBackClick = { navController.popBackStack() }
+                diarioId = diarioId,
+                onBackClick = { navController.popBackStack() },
+                onEditClick = { navController.navigate("editar_diario/$diarioId") }
             )
         }
 
@@ -108,9 +108,10 @@ fun AppNavigation(
             )
         }
 
-        // Pantalla de Nuevo Diario
+        // Pantalla de Nuevo Diario (Crear vacío)
         composable(AppDestinations.NuevoDiario.route) {
             NuevoDiarioScreen(
+                diarioIdToEdit = null, // null porque es nuevo
                 onBackClick = { navController.popBackStack() },
                 onSaveClick = {
                     navController.navigate(AppDestinations.Diario.route) {
@@ -120,42 +121,26 @@ fun AppNavigation(
             )
         }
 
-        // Pantalla de Respiración
-        composable(AppDestinations.ERespiracion.route) {
-            RespiracionScreen(
-                onBackClick = { navController.popBackStack() }
-            )
-        }
-
-        // Menú principal del Botiquín Emocional
-        composable(AppDestinations.Ejercicios.route) {
-            EjerciciosScreen(
+        // NUEVA RUTA EXCLUSIVA PARA EDITAR (Reutiliza NuevoDiarioScreen)
+        composable(
+            route = "editar_diario/{diarioId}",
+            arguments = listOf(navArgument("diarioId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val diarioId = backStackEntry.arguments?.getInt("diarioId") ?: -1
+            NuevoDiarioScreen(
+                diarioIdToEdit = diarioId, // Le pasamos el ID para que cargue los datos
                 onBackClick = { navController.popBackStack() },
-                onNavigateToExercise = { rutaEjercicio ->
-                    navController.navigate(rutaEjercicio)
+                onSaveClick = {
+                    navController.popBackStack() // Regresa al detalle tras guardar
                 }
             )
         }
 
-        // Pantalla de Aterrizaje 5-4-3-2-1
-        composable(AppDestinations.EAterrizaje.route) {
-            AterrizajeScreen(
-                onBackClick = { navController.popBackStack() }
-            )
-        }
-
-        // Pantalla de Refuerzo Positivo
-        composable(AppDestinations.RefuerzoPositivo.route) {
-            RefuerzoPositivoScreen(
-                onBackClick = { navController.popBackStack() }
-            )
-        }
-
-        // Pantalla de Catarsis Simbólica
-        composable(AppDestinations.ECatarsis.route) {
-            CatarsisScreen(
-                onBackClick = { navController.popBackStack() }
-            )
-        }
+        // Resto del botiquín...
+        composable(AppDestinations.ERespiracion.route) { RespiracionScreen(onBackClick = { navController.popBackStack() }) }
+        composable(AppDestinations.Ejercicios.route) { EjerciciosScreen(onBackClick = { navController.popBackStack() }, onNavigateToExercise = { ruta -> navController.navigate(ruta) }) }
+        composable(AppDestinations.EAterrizaje.route) { AterrizajeScreen(onBackClick = { navController.popBackStack() }) }
+        composable(AppDestinations.RefuerzoPositivo.route) { RefuerzoPositivoScreen(onBackClick = { navController.popBackStack() }) }
+        composable(AppDestinations.ECatarsis.route) { CatarsisScreen(onBackClick = { navController.popBackStack() }) }
     }
 }
