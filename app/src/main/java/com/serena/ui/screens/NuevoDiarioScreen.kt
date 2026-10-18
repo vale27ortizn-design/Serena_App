@@ -1,5 +1,6 @@
 package com.serena.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,6 +30,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,14 +39,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.serena.R
+import com.serena.data.local.DatabaseHelper
 import com.serena.ui.components.SerenaBackTopBar
 
 data class EmocionData(val nombre: String, val iconoRes: Int)
@@ -53,16 +59,41 @@ data class InfluenciaData(val nombre: String, val iconoRes: Int)
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NuevoDiarioScreen(
+    diarioIdToEdit: Int? = null, // NUEVO: Si recibimos un ID, entramos en modo edición
     onBackClick: () -> Unit = {},
     onNotificationClick: () -> Unit = {},
     onSaveClick: () -> Unit = {}
 ) {
+    // --- CONTEXTO PARA LA BASE DE DATOS ---
+    val context = LocalContext.current
+
     // --- ESTADOS ---
     var emocionSeleccionada by remember { mutableStateOf<String?>(null) }
     var textoDiario by remember { mutableStateOf("") }
     var influenciasSeleccionadas by remember { mutableStateOf(setOf<String>()) }
+    var mostrarError by remember { mutableStateOf(false) }
+    var showSuccessDialog by remember { mutableStateOf(false) }
 
-    // --- EMOJIS (Nombres exactos de drawable) ---
+    // --- LÓGICA DE EDICIÓN ---
+    var isEditing by remember { mutableStateOf(false) }
+
+    // Si nos pasan un ID, buscamos los datos en la base de datos y los cargamos
+    LaunchedEffect(diarioIdToEdit) {
+        if (diarioIdToEdit != null && diarioIdToEdit != -1) {
+            isEditing = true
+            val dbHelper = DatabaseHelper(context)
+            val diario = dbHelper.obtenerDiarioPorId(diarioIdToEdit)
+            if (diario != null) {
+                emocionSeleccionada = diario.emocion
+                textoDiario = diario.texto
+                if (diario.influencias.isNotBlank()) {
+                    influenciasSeleccionadas = diario.influencias.split(",").map { it.trim() }.toSet()
+                }
+            }
+        }
+    }
+
+    // --- EMOJIS ---
     val listaEmociones = listOf(
         EmocionData("Feliz", R.drawable.emoji_feliz),
         EmocionData("Tranquila", R.drawable.emoji_tranquila),
@@ -72,7 +103,7 @@ fun NuevoDiarioScreen(
         EmocionData("Frustrada", R.drawable.emoji_frustada)
     )
 
-    // --- INFLUENCIAS CON SUS ICONOS CORRESPONDIENTES ---
+    // --- INFLUENCIAS ---
     val listaInfluencias = listOf(
         InfluenciaData("Trabajo", R.drawable.icon_trabajo),
         InfluenciaData("Familia", R.drawable.icon_familia),
@@ -86,7 +117,7 @@ fun NuevoDiarioScreen(
         containerColor = colorResource(id = R.color.white),
         topBar = {
             SerenaBackTopBar(
-                title = "Nuevo día, Nueva vida",
+                title = if (isEditing) "Editar mi nota" else "Nuevo día, Nueva vida", // Cambia el título si editas
                 onBackClick = onBackClick,
                 onActionClick = onNotificationClick
             )
@@ -100,26 +131,60 @@ fun NuevoDiarioScreen(
                     .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // VARIABLES DE VALIDACIÓN:
-                // Se debe seleccionar una emoción y escribir algo
                 val isFormValid = emocionSeleccionada != null && textoDiario.isNotBlank()
+
+                // --- VALIDACIÓN VISUAL (Letras rojas) ---
+                if (mostrarError) {
+                    if (emocionSeleccionada == null) {
+                        Text(
+                            text = "* Por favor, selecciona cómo te sientes hoy",
+                            color = Color.Red,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    } else if (textoDiario.isBlank()) {
+                        Text(
+                            text = "* Por favor, escribe qué hay en tu mente",
+                            color = Color.Red,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
 
                 Button(
                     onClick = {
                         if (isFormValid) {
-                            onSaveClick()
+                            mostrarError = false
+                            val influenciasTexto = influenciasSeleccionadas.joinToString(", ")
+                            val dbHelper = DatabaseHelper(context)
+                            val usuarioId = 1
+
+                            // DECIDIMOS SI ACTUALIZAR O REGISTRAR UNO NUEVO
+                            val exito = if (isEditing && diarioIdToEdit != null) {
+                                dbHelper.actualizarDiario(diarioIdToEdit, emocionSeleccionada!!, textoDiario, influenciasTexto)
+                            } else {
+                                dbHelper.registrarDiario(usuarioId, emocionSeleccionada!!, textoDiario, influenciasTexto) != -1L
+                            }
+
+                            if (exito) {
+                                showSuccessDialog = true
+                            } else {
+                                Toast.makeText(context, "Error al guardar el diario", Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            mostrarError = true
                         }
                     },
-                    // Si el formulario es válido, el botón es verde. Si no, es un verde transparente (deshabilitado visualmente)
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = colorResource(id = R.color.serena_green_dark),
-                        disabledContainerColor = colorResource(id = R.color.serena_green_dark).copy(alpha = 0.5f)
+                        containerColor = if (isFormValid) colorResource(id = R.color.serena_green_dark) else colorResource(id = R.color.serena_green_dark).copy(alpha = 0.5f)
                     ),
                     shape = RoundedCornerShape(50),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(54.dp),
-                    enabled = isFormValid // Bloquea el clic y activa el color 'disabled'
+                        .height(54.dp)
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.icon_check),
@@ -129,7 +194,7 @@ fun NuevoDiarioScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Guardar en mi diario",
+                        text = if (isEditing) "Guardar cambios" else "Guardar en mi diario",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -343,7 +408,6 @@ fun NuevoDiarioScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                // Sabiendo que hay 6 elementos, iteramos 2 filas de 3
                 for (i in 0 until 2) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -357,7 +421,7 @@ fun NuevoDiarioScreen(
 
                                 Row(
                                     modifier = Modifier
-                                        .weight(1f) // Esto hace que ocupen el 33.3% de la fila
+                                        .weight(1f)
                                         .clip(RoundedCornerShape(50))
                                         .background(
                                             if (isTagSelected) colorResource(id = R.color.serena_streak_bg)
@@ -372,7 +436,7 @@ fun NuevoDiarioScreen(
                                         }
                                         .padding(horizontal = 6.dp, vertical = 10.dp),
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center // Centra el texto y el icono en el chip
+                                    horizontalArrangement = Arrangement.Center
                                 ) {
                                     Icon(
                                         painter = painterResource(id = item.iconoRes),
@@ -391,7 +455,6 @@ fun NuevoDiarioScreen(
                                     )
                                 }
                             } else {
-                                // Spacer invisible en caso de que falten elementos para completar la fila
                                 Spacer(modifier = Modifier.weight(1f))
                             }
                         }
@@ -400,6 +463,75 @@ fun NuevoDiarioScreen(
             }
 
             Spacer(modifier = Modifier.height(50.dp))
+        }
+
+        // --- CUADRO DE AVISO (DIALOG) DE ÉXITO ---
+        if (showSuccessDialog) {
+            Dialog(onDismissRequest = { /* No hacer nada si tocan afuera para obligar a dar en Continuar */ }) {
+                Surface(
+                    shape = RoundedCornerShape(24.dp),
+                    color = Color.White,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Círculo con el check
+                        Box(
+                            modifier = Modifier
+                                .size(60.dp)
+                                .clip(CircleShape)
+                                .background(colorResource(id = R.color.serena_green_dark).copy(alpha = 0.1f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.icon_check),
+                                contentDescription = "Éxito",
+                                tint = colorResource(id = R.color.serena_green_dark),
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = "¡Diario guardado!",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colorResource(id = R.color.serena_text_dark)
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Tu reflexión está a salvo. Cada vez que escribes, das un hermoso paso hacia tu tranquilidad mental. ¡Sigue así!",
+                            fontSize = 14.sp,
+                            color = colorResource(id = R.color.serena_text_gray),
+                            textAlign = TextAlign.Center,
+                            lineHeight = 20.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Button(
+                            onClick = {
+                                showSuccessDialog = false
+                                onSaveClick() // Al dar Continuar, recién regresamos a la pantalla anterior
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.serena_green_dark)),
+                            shape = RoundedCornerShape(50),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                        ) {
+                            Text("Continuar", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        }
+                    }
+                }
+            }
         }
     }
 }
