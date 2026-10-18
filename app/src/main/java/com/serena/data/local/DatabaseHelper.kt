@@ -49,7 +49,22 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
             )
         """.trimIndent())
 
+        db.execSQL("""
+            CREATE TABLE diarios (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario_id INTEGER NOT NULL,
+                emocion TEXT NOT NULL,
+                texto TEXT NOT NULL,
+                influencias TEXT NOT NULL,
+                fecha INTEGER NOT NULL,
+                FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+            )
+        """.trimIndent())
+
     } override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+
+        db.execSQL("DROP TABLE IF EXISTS diarios")
+
         db.execSQL("DROP TABLE IF EXISTS actividad")
 
         db.execSQL("DROP TABLE IF EXISTS usuarios")
@@ -107,6 +122,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
             } else null
         }
     }
+
+
 
     // Número de día local (evita que el día cambie a las 7 pm por UTC en Perú)
     private fun diaActual(): Long {
@@ -176,8 +193,89 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
             .digest((salt + clave).toByteArray(Charsets.UTF_8))
         return Base64.encodeToString(digest, Base64.NO_WRAP)
     }
+
+    //funciones del diario
+    // ---------------- DIARIO EMOCIONAL ----------------
+
+    // Función para guardar un nuevo registro en el diario
+    fun registrarDiario(usuarioId: Int, emocion: String, texto: String, influencias: String): Long {
+        val values = ContentValues().apply {
+            put("usuario_id", usuarioId)
+            put("emocion", emocion.trim())
+            put("texto", texto.trim())
+            put("influencias", influencias.trim())
+            put("fecha", System.currentTimeMillis())
+        }
+        return writableDatabase.insert("diarios", null, values)
+    }
+
+    // Esta clase nos ayudará a leer los diarios guardados
+    data class DiarioItem(
+        val id: Int,
+        val emocion: String,
+        val texto: String,
+        val influencias: String,
+        val fecha: Long
+    )
+
+    // Función para obtener todos los diarios de un usuario (del más reciente al más antiguo)
+    fun obtenerDiarios(usuarioId: Int): List<DiarioItem> {
+        val lista = mutableListOf<DiarioItem>()
+        readableDatabase.rawQuery(
+            "SELECT id, emocion, texto, influencias, fecha FROM diarios WHERE usuario_id = ? ORDER BY fecha DESC",
+            arrayOf(usuarioId.toString())
+        ).use { c ->
+            while (c.moveToNext()) {
+                lista.add(
+                    DiarioItem(
+                        id = c.getInt(0),
+                        emocion = c.getString(1),
+                        texto = c.getString(2),
+                        influencias = c.getString(3),
+                        fecha = c.getLong(4)
+                    )
+                )
+            }
+        }
+        return lista
+    }
+    // Función para obtener un solo diario por su ID
+    fun obtenerDiarioPorId(id: Int): DiarioItem? {
+        readableDatabase.rawQuery(
+            "SELECT id, emocion, texto, influencias, fecha FROM diarios WHERE id = ?",
+            arrayOf(id.toString())
+        ).use { c ->
+            if (c.moveToFirst()) {
+                return DiarioItem(
+                    id = c.getInt(0),
+                    emocion = c.getString(1),
+                    texto = c.getString(2),
+                    influencias = c.getString(3),
+                    fecha = c.getLong(4)
+                )
+            }
+        }
+        return null
+    }
+    // Función para eliminar un diario por su ID
+    fun eliminarDiario(id: Int): Boolean {
+        val db = this.writableDatabase
+        val result = db.delete("diarios", "id = ?", arrayOf(id.toString()))
+        return result > 0
+    }
+    // Función para actualizar un diario existente (Modo Editar)
+    fun actualizarDiario(id: Int, emocion: String, texto: String, influencias: String): Boolean {
+        val values = ContentValues().apply {
+            put("emocion", emocion.trim())
+            put("texto", texto.trim())
+            put("influencias", influencias.trim())
+            // Nota: No actualizamos la "fecha", se queda con la original de cuando lo creó
+        }
+        val result = writableDatabase.update("diarios", values, "id = ?", arrayOf(id.toString()))
+        return result > 0
+    }
     companion object {
         private const val DATABASE_NAME = "serena_app.db"
-        private const val DATABASE_VERSION = 3   // antes: 2
+        private const val DATABASE_VERSION = 4   // antes: 3
     }
 }
