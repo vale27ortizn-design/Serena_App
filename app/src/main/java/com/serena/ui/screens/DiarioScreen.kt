@@ -240,13 +240,14 @@ private fun FilterChipItem(
     onClick: () -> Unit = {}
 ) {
     Surface(
-        shape = RoundedCornerShape(50),
-        color = if (isSelected) colorResource(R.color.serena_green_dark) else colorResource(R.color.serena_chip_unselected_bg)
+        shape = RoundedCornerShape(50), // Da la forma redondeada
+        color = if (isSelected) colorResource(R.color.serena_green_dark) else colorResource(R.color.serena_chip_unselected_bg),
+        modifier = Modifier
+            .clip(RoundedCornerShape(50)) // 1. Corta el borde
+            .clickable { onClick() }      // 2. Aplica el click (ahora el efecto gris será redondeado)
     ) {
         Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .clickable { onClick() },
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (iconRes != null) {
@@ -267,7 +268,6 @@ private fun FilterChipItem(
         }
     }
 }
-
 @Composable
 private fun ReflexionDelDiaCard() {
     Surface(
