@@ -98,7 +98,7 @@ fun DetalleDiarioScreen(
                     } else {
                         reflexionIA = "No pude conectarme para generar tu reflexión hoy. Respira profundo."
                     }
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     reflexionIA = "La reflexión no está disponible en este momento."
                 } finally {
                     isReflexionLoading = false
@@ -122,7 +122,6 @@ fun DetalleDiarioScreen(
         }
         return
     }
-
     val d = diario!!
     val date = Date(d.fecha)
     val formatoFecha = SimpleDateFormat("EEEE, dd 'de' MMMM 'de' yyyy • HH:mm'hrs'", Locale("es", "ES"))
