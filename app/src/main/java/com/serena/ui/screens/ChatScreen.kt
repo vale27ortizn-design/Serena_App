@@ -1,5 +1,7 @@
 package com.serena.ui.screens
 
+import android.app.Application
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -20,55 +23,91 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.serena.R
 import com.serena.ui.chat.ChatViewModel
+import com.serena.ui.chat.ChatViewModelFactory
 import com.serena.ui.model.ChatMessage
+import com.serena.ui.model.Conversation
 import com.serena.ui.theme.SerenaAppTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.serena.data.preferences.SessionManager
 
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit = {},
-    viewModel: ChatViewModel = viewModel()
+    // Se obtiene del usuario con sesión iniciadas
+    userId: String = SessionManager(LocalContext.current).let {
+        "${it.getUserId()}_${it.getUserEmail()}"
+    },
+    viewModel: ChatViewModel = viewModel(
+        key = "chat_$userId", // un ViewModel distinto por usuario
+        factory = ChatViewModelFactory(
+            LocalContext.current.applicationContext as Application,
+            userId
+        )
+    )
 ) {
     val state by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
 
+    var showHistory by remember { mutableStateOf(false) }
+    var conversationToDelete by remember { mutableStateOf<String?>(null) }
+
     // Baja automáticamente al último mensaje (o al indicador "escribiendo")
     val itemCount = state.messages.size + if (state.isLoading) 1 else 0
-    LaunchedEffect(itemCount) {
+    LaunchedEffect(state.currentId, itemCount) {
         if (itemCount > 0) listState.animateScrollToItem(itemCount - 1)
     }
 
     Scaffold(
-        modifier = modifier.imePadding(), // el teclado empuja el input hacia arriba
-        topBar = { ChatTopBar(onBackClick = onBackClick) },
+        modifier = modifier.imePadding(),
+        topBar = {
+            ChatTopBar(
+                onBackClick = onBackClick,
+                onHistoryClick = { showHistory = true },
+                onNewChatClick = viewModel::newChat
+            )
+        },
         bottomBar = {
             ChatInputArea(
                 input = state.input,
@@ -100,12 +139,147 @@ fun ChatScreen(
             }
         }
     }
+
+    if (showHistory) {
+        HistorySheet(
+            conversations = state.conversations,
+            currentId = state.currentId,
+            onSelect = {
+                viewModel.selectConversation(it)
+                showHistory = false
+            },
+            onNewChat = {
+                viewModel.newChat()
+                showHistory = false
+            },
+            onDelete = { conversationToDelete = it },
+            onDismiss = { showHistory = false }
+        )
+    }
+
+    // --- CUADRO DE AVISO: ELIMINAR CONVERSACIÓN ---
+    conversationToDelete?.let { id ->
+        DeleteConversationDialog(
+            onConfirm = {
+                viewModel.deleteConversation(id)
+                conversationToDelete = null
+            },
+            onDismiss = { conversationToDelete = null }
+        )
+    }
 }
 
 // ---------------- SUBCOMPONENTES ----------------
 
 @Composable
-private fun ChatTopBar(onBackClick: () -> Unit) {
+private fun DeleteConversationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(24.dp),
+            color = Color.White,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Círculo con el ícono
+                Box(
+                    modifier = Modifier
+                        .size(60.dp)
+                        .clip(CircleShape)
+                        .background(colorResource(id = R.color.serena_green_dark).copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.icon_basura),
+                        contentDescription = "Eliminar",
+                        tint = colorResource(id = R.color.serena_green_dark),
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "¿Eliminar conversación?",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colorResource(id = R.color.serena_text_dark),
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Esta conversación se borrará de forma permanente y no podrás recuperarla.",
+                    fontSize = 14.sp,
+                    color = colorResource(id = R.color.serena_text_gray),
+                    textAlign = TextAlign.Center,
+                    lineHeight = 20.sp
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        shape = RoundedCornerShape(50),
+                        border = BorderStroke(1.dp, colorResource(id = R.color.serena_green_dark)),
+                        contentPadding = PaddingValues(horizontal = 4.dp), // Ajusta el padding interno aquí
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                    ) {
+                        Text(
+                            text = "Cancelar",
+                            color = colorResource(id = R.color.serena_green_dark),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            maxLines = 1 // Asegura que no intente saltar de línea
+                        )
+                    }
+
+                    Button(
+                        onClick = onConfirm,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colorResource(id = R.color.serena_green_dark)
+                        ),
+                        shape = RoundedCornerShape(50),
+                        contentPadding = PaddingValues(horizontal = 4.dp), // Ajusta el padding interno aquí
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                    ) {
+                        Text(
+                            text = "Eliminar",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            maxLines = 1
+                        )
+                    }
+
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChatTopBar(
+    onBackClick: () -> Unit,
+    onHistoryClick: () -> Unit,
+    onNewChatClick: () -> Unit
+) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = colorResource(R.color.white),
@@ -176,13 +350,172 @@ private fun ChatTopBar(onBackClick: () -> Unit) {
                 }
             }
 
-            // Menú
-            Icon(
-                painter = painterResource(id = R.drawable.icon_mas),
-                contentDescription = "Opciones",
-                tint = colorResource(R.color.serena_text_gray),
-                modifier = Modifier.size(24.dp)
+            // Menú de tres puntos
+            var menuExpanded by remember { mutableStateOf(false) }
+
+            Box {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_menu3puntos),
+                    contentDescription = "Opciones",
+                    tint = colorResource(R.color.serena_text_gray),
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .clickable { menuExpanded = true }
+                )
+
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false },
+                    modifier = Modifier.background(colorResource(R.color.white))
+                ) {
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "Historial",
+                                fontSize = 14.sp,
+                                color = colorResource(R.color.serena_text_dark)
+                            )
+                        },
+                        onClick = {
+                            menuExpanded = false
+                            onHistoryClick()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "Nuevo chat",
+                                fontSize = 14.sp,
+                                color = colorResource(R.color.serena_text_dark)
+                            )
+                        },
+                        onClick = {
+                            menuExpanded = false
+                            onNewChatClick()
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HistorySheet(
+    conversations: List<Conversation>,
+    currentId: String,
+    onSelect: (String) -> Unit,
+    onNewChat: () -> Unit,
+    onDelete: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    // Solo se muestran chats con al menos un mensaje del usuario
+    val items = conversations
+        .filter { it.messages.size > 1 }
+        .sortedByDescending { it.updatedAt }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = colorResource(R.color.white)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 24.dp)
+        ) {
+            Text(
+                text = "Tus conversaciones",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = colorResource(R.color.serena_text_dark)
             )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = colorResource(R.color.serena_green_primary),
+                modifier = Modifier.clickable(onClick = onNewChat)
+            ) {
+                Text(
+                    text = "+  Nuevo chat",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = colorResource(R.color.white),
+                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (items.isEmpty()) {
+                Text(
+                    text = "Aún no tienes conversaciones guardadas.",
+                    fontSize = 13.sp,
+                    color = colorResource(R.color.serena_text_gray)
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 420.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(items, key = { it.id }) { conversation ->
+                        ConversationRow(
+                            conversation = conversation,
+                            selected = conversation.id == currentId,
+                            onClick = { onSelect(conversation.id) },
+                            onDelete = { onDelete(conversation.id) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ConversationRow(
+    conversation: Conversation,
+    selected: Boolean,
+    onClick: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val date = SimpleDateFormat("dd MMM, HH:mm", Locale.getDefault())
+        .format(Date(conversation.updatedAt))
+
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = if (selected) colorResource(R.color.serena_green_light)
+        else colorResource(R.color.serena_bg_input),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 16.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = conversation.title,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = colorResource(R.color.serena_text_dark),
+                    maxLines = 1
+                )
+                Text(
+                    text = date,
+                    fontSize = 11.sp,
+                    color = colorResource(R.color.serena_text_gray)
+                )
+            }
+            TextButton(onClick = onDelete) {
+                Text(
+                    text = "Eliminar",
+                    fontSize = 12.sp,
+                    color = colorResource(R.color.serena_text_gray)
+                )
+            }
         }
     }
 }
@@ -394,13 +727,5 @@ private fun ChatInputArea(
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ChatScreenPreview() {
-    SerenaAppTheme {
-        ChatScreen()
     }
 }
