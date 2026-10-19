@@ -1,6 +1,7 @@
 package com.serena.ui.screens
 
 import android.app.Application
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -39,6 +40,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -61,21 +63,25 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.serena.R
+import com.serena.data.preferences.SessionManager
 import com.serena.ui.chat.ChatViewModel
 import com.serena.ui.chat.ChatViewModelFactory
+import com.serena.ui.chat.TtsManager
 import com.serena.ui.model.ChatMessage
 import com.serena.ui.model.Conversation
 import com.serena.ui.theme.SerenaAppTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import com.serena.data.preferences.SessionManager
+
+private const val VOICE_UNAVAILABLE =
+    "No hay una voz en español instalada. Actívala en Ajustes → Salida de texto a voz."
 
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit = {},
-    // Se obtiene del usuario con sesión iniciadas
+    // Se obtiene del usuario con sesión iniciada: id + correo
     userId: String = SessionManager(LocalContext.current).let {
         "${it.getUserId()}_${it.getUserEmail()}"
     },
@@ -87,11 +93,29 @@ fun ChatScreen(
         )
     )
 ) {
+    val context = LocalContext.current
     val state by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
 
     var showHistory by remember { mutableStateOf(false) }
     var conversationToDelete by remember { mutableStateOf<String?>(null) }
+
+    // ---------------- VOZ (solo al tocar "Escuchar") ----------------
+    val tts = remember { TtsManager(context) }
+    DisposableEffect(Unit) { onDispose { tts.shutdown() } }
+
+    // Al cambiar de conversación, se calla
+    LaunchedEffect(state.currentId) { tts.stop() }
+
+    fun onSpeakClick(message: ChatMessage) {
+        when {
+            tts.unavailable -> Toast.makeText(context, VOICE_UNAVAILABLE, Toast.LENGTH_LONG).show()
+            tts.speakingId == message.id -> tts.stop()
+            else -> if (!tts.speak(message.id, message.text)) {
+                Toast.makeText(context, VOICE_UNAVAILABLE, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
 
     // Baja automáticamente al último mensaje (o al indicador "escribiendo")
     val itemCount = state.messages.size + if (state.isLoading) 1 else 0
@@ -115,8 +139,14 @@ fun ChatScreen(
                 error = state.error,
                 showSuggestions = state.messages.size == 1,
                 onInputChange = viewModel::onInputChange,
-                onSend = { viewModel.sendMessage() },
-                onSuggestionClick = { viewModel.sendMessage(it) },
+                onSend = {
+                    tts.stop()
+                    viewModel.sendMessage()
+                },
+                onSuggestionClick = {
+                    tts.stop()
+                    viewModel.sendMessage(it)
+                },
                 onDismissError = viewModel::dismissError
             )
         },
@@ -132,7 +162,16 @@ fun ChatScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(state.messages, key = { it.id }) { message ->
-                if (message.isFromUser) UserMessageBubble(message) else BotMessageBubble(message)
+                if (message.isFromUser) {
+                    UserMessageBubble(message)
+                } else {
+                    BotMessageBubble(
+                        message = message,
+                        isSpeaking = tts.speakingId == message.id,
+                        voiceUnavailable = tts.unavailable,
+                        onSpeakClick = { onSpeakClick(message) }
+                    )
+                }
             }
             if (state.isLoading) {
                 item { TypingIndicator() }
@@ -234,7 +273,6 @@ private fun DeleteConversationDialog(
                         onClick = onDismiss,
                         shape = RoundedCornerShape(50),
                         border = BorderStroke(1.dp, colorResource(id = R.color.serena_green_dark)),
-                        contentPadding = PaddingValues(horizontal = 4.dp), // Ajusta el padding interno aquí
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp)
@@ -243,8 +281,7 @@ private fun DeleteConversationDialog(
                             text = "Cancelar",
                             color = colorResource(id = R.color.serena_green_dark),
                             fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp,
-                            maxLines = 1 // Asegura que no intente saltar de línea
+                            fontSize = 15.sp
                         )
                     }
 
@@ -254,7 +291,6 @@ private fun DeleteConversationDialog(
                             containerColor = colorResource(id = R.color.serena_green_dark)
                         ),
                         shape = RoundedCornerShape(50),
-                        contentPadding = PaddingValues(horizontal = 4.dp), // Ajusta el padding interno aquí
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp)
@@ -263,11 +299,9 @@ private fun DeleteConversationDialog(
                             text = "Eliminar",
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp,
-                            maxLines = 1
+                            fontSize = 15.sp
                         )
                     }
-
                 }
             }
         }
@@ -524,7 +558,58 @@ private fun formatTime(timestamp: Long): String =
     SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(timestamp))
 
 @Composable
-private fun BotMessageBubble(message: ChatMessage) {
+private fun SpeakButton(
+    isSpeaking: Boolean,
+    voiceUnavailable: Boolean,
+    onClick: () -> Unit
+) {
+    val iconRes = when {
+        voiceUnavailable -> R.drawable.icon_sinvolumen
+        isSpeaking -> R.drawable.icon_detener
+        else -> R.drawable.icon_volumen
+    }
+    val label = when {
+        voiceUnavailable -> "Sin voz"
+        isSpeaking -> "Detener"
+        else -> "Escuchar"
+    }
+    val background = if (isSpeaking) colorResource(R.color.serena_green_primary)
+    else colorResource(R.color.serena_bg_input)
+    val content = if (isSpeaking) colorResource(R.color.white)
+    else colorResource(R.color.serena_text_dark)
+
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = background,
+        modifier = Modifier.clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = iconRes),
+                contentDescription = label,
+                tint = content,
+                modifier = Modifier.size(14.dp)
+            )
+            Spacer(modifier = Modifier.width(5.dp))
+            Text(
+                text = label,
+                fontSize = 11.sp,
+                color = content
+            )
+        }
+    }
+}
+
+@Composable
+private fun BotMessageBubble(
+    message: ChatMessage,
+    isSpeaking: Boolean,
+    voiceUnavailable: Boolean,
+    onSpeakClick: () -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Start,
@@ -554,11 +639,19 @@ private fun BotMessageBubble(message: ChatMessage) {
                 )
             }
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = formatTime(message.timestamp),
-                fontSize = 10.sp,
-                color = colorResource(R.color.serena_text_gray)
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = formatTime(message.timestamp),
+                    fontSize = 10.sp,
+                    color = colorResource(R.color.serena_text_gray)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                SpeakButton(
+                    isSpeaking = isSpeaking,
+                    voiceUnavailable = voiceUnavailable,
+                    onClick = onSpeakClick
+                )
+            }
         }
     }
 }
@@ -727,5 +820,13 @@ private fun ChatInputArea(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ChatScreenPreview() {
+    SerenaAppTheme {
+        ChatScreen(userId = "preview")
     }
 }
