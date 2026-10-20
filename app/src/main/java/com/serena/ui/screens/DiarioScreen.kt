@@ -114,7 +114,7 @@ fun DiarioScreen(
                 onNotificationClick = { /* Acción notificaciones */ }
             )
 
-            // Contenido con scroll vertical (Estructura de Valeria mantenida)
+            // Contenido con scroll vertical
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -123,7 +123,7 @@ fun DiarioScreen(
             ) {
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Barra de Búsqueda Falsa
+                // Barra de Búsqueda
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()

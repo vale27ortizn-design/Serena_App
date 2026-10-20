@@ -507,7 +507,7 @@ fun NuevoDiarioScreen(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
-                            text = "Tu reflexión está a salvo. Cada vez que escribes, das un hermoso paso hacia tu tranquilidad mental. ¡Sigue así!",
+                            text = "Tu reflexión está a salvo. Cada vez que escribes, das un hermoso paso hacia tu tranquilidad mental.\n¡Sigue así!",
                             fontSize = 14.sp,
                             color = colorResource(id = R.color.serena_text_gray),
                             textAlign = TextAlign.Center,

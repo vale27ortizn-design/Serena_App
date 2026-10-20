@@ -1,5 +1,6 @@
 package com.serena.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -65,15 +66,46 @@ fun InicioScreen(
     var selectedEmotion by remember { mutableStateOf("En calma") }
     var updateText by remember { mutableStateOf("Actualizado hace 2h") }
 
+    // --- LÓGICA DE NOTIFICACIONES ---
+    val solicitarPermisosNotificaciones = rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { concedido ->
+        if (concedido) {
+            com.serena.notifications.RecordatorioScheduler.programar(context)
+            android.widget.Toast.makeText(context, "¡Recordatorios diarios activados!", android.widget.Toast.LENGTH_SHORT).show()
+        } else {
+            android.widget.Toast.makeText(context, "Debes permitir las notificaciones para avisarte", android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val activarNotificaciones = {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            val permisoConcedido = androidx.core.content.ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.POST_NOTIFICATIONS
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+            if (permisoConcedido) {
+                com.serena.notifications.RecordatorioScheduler.programar(context)
+                android.widget.Toast.makeText(context, "¡Recordatorios diarios activados!", android.widget.Toast.LENGTH_SHORT).show()
+            } else {
+                solicitarPermisosNotificaciones.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+        } else {
+            com.serena.notifications.RecordatorioScheduler.programar(context)
+            android.widget.Toast.makeText(context, "¡Recordatorios diarios activados!", android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(colorResource(R.color.white))
     ) {
-        // TopBar fija superior
+// TopBar fija superior
         SerenaTopBar(
             title = "Menú Principal",
-            onNotificationClick = { /* Acción notificaciones */ }
+            onNotificationClick = { activarNotificaciones() } // Conectamos la función aquí
         )
 
         // Contenido con scroll vertical
